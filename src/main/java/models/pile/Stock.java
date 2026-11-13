@@ -1,4 +1,4 @@
-package models.piles;
+package models.pile;
 
 public class Stock {
 }
