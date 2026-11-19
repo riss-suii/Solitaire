@@ -1,9 +1,0 @@
-package enums;
-
-public enum MoveType {
-    STOCK_TO_WASTE,
-    WASTE_TO_FOUNDATION,
-    WASTE_TO_TABLEAU,
-    TABLEAU_TO_FOUNDATION,
-    FOUNDATION_TO_TABLEAU;
-}
