@@ -25,12 +25,17 @@ public enum Rank {
         return symbol;
     }
 
-    public static Rank fromSymbol(String symbol) {
-        for (Rank rank : values()) {
-            if (rank.symbol.equalsIgnoreCase(symbol)) {
-                return rank;
+    /** Ace = 1 ... King = 13. */
+    public int getValue() {
+        return ordinal() + 1;
+    }
+
+    public static Rank fromSymbol(String text) {
+        for (Rank currentRank : values()) {
+            if (currentRank.symbol.equals(text)) {
+                return currentRank;
             }
         }
-        throw new IllegalArgumentException("Unknown rank: '" + symbol + "'");
+        return null;
     }
 }

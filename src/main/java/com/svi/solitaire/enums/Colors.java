@@ -9,7 +9,7 @@ public enum Colors {
     RED("\u001B[31m"),
     GREEN("\u001B[32m"),
     YELLOW("\u001B[38;5;214m"),
-    BLUE("\u001B[38;5;18m");
+    BLUE("\u001B[36m");
 
     private final String code;
 
@@ -21,8 +21,7 @@ public enum Colors {
         return code;
     }
 
-    @Override
-    public String toString() {
-        return code;
+    public String colorize(String text) {
+        return code + text + RESET.code;
     }
 }

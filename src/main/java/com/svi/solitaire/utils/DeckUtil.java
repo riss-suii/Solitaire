@@ -1,4 +1,4 @@
 package com.svi.solitaire.utils;
 
-public class DeckUtil {
+public final class DeckUtil {
 }
