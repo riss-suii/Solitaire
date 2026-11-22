@@ -2,6 +2,7 @@ package com.svi.solitaire.io;
 
 import com.svi.solitaire.enums.Colors;
 import com.svi.solitaire.enums.Constants;
+import com.svi.solitaire.enums.DrawMove;
 
 import java.io.PrintStream;
 
@@ -41,7 +42,7 @@ public class ConsoleDisplay {
     }
 
     public void showMessage(String message) {
-        out.println("  " + message);
+        out.println(message);
     }
     public void showError(String message) {
         out.println(style(Colors.RED, "Error: " + message));
@@ -52,6 +53,14 @@ public class ConsoleDisplay {
         out.print(style(Colors.GREEN, text));
         out.flush();
     }
+
+    // ---------------------------------------------------------------- results
+    public void showSimulationHeader(int games, DrawMove drawMove, String shuffleName) {
+        out.println();
+        out.println("  Simulating " + games + " game" + (games == 1 ? "" : "s")
+                + "  |  Draw " + drawMove.getCount() + "  |  " + shuffleName);
+    }
+
 
     // ---------------------------------------------------------------- helpers
 

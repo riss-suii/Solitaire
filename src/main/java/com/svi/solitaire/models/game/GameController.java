@@ -87,7 +87,7 @@ public class GameController {
 
             deck = fileLoader.loadDeck(fileName);
 
-        } while (deck.size() != Constants.TOTAL_CARDS.getValue());
+        } while (deck.count() != Constants.TOTAL_CARDS.getValue());
 
         view.showMessage("Deck loaded.");
 

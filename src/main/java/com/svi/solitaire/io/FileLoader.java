@@ -82,15 +82,15 @@ public class FileLoader {
                 if (deck.contains(card)) {
                     throw new IllegalArgumentException("Duplicate card detected.");
                 }
-                if (deck.size() == Constants.TOTAL_CARDS.getValue()) {
+                if (deck.count() == Constants.TOTAL_CARDS.getValue()) {
                     throw new IllegalArgumentException("Too many cards in the deck (expected exactly " + Constants.TOTAL_CARDS
                             + ", but found more).");
                 }
                 deck.addCard(card);
             }
         }
-        if (deck.size() != Constants.TOTAL_CARDS.getValue()) {
-            throw new IllegalArgumentException("Invalid number of cards in the deck (found " + deck.size()
+        if (deck.count() != Constants.TOTAL_CARDS.getValue()) {
+            throw new IllegalArgumentException("Invalid number of cards in the deck (found " + deck.count()
                     + ", expected " + Constants.TOTAL_CARDS + ").");
         }
         return deck;

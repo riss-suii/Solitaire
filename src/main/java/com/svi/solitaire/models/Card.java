@@ -1,5 +1,6 @@
 package com.svi.solitaire.models;
 
+import com.svi.solitaire.enums.Constants;
 import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.utils.CardUtil;
@@ -24,19 +25,16 @@ public class Card {
         return suit;
     }
 
-    public boolean isFaceUp() {
-        return faceUp;
-    }
-
-    public void setFaceUp(boolean faceUp) {
-        this.faceUp = faceUp;
-    }
-
     public boolean isRed() {
         return suit.isRed();
     }
 
-    /** Identity is rank + suit only; the face-up state is not part of it. */
+    /** Unique id 0..51 (used for hashing positions). */
+    public int id() {
+        return suit.ordinal() * Constants.CARDS_PER_SUIT.getValue() + rank.ordinal();
+    }
+
+    /** Identity is rank + suit. Whether a card is face up is tracked by its tableau pile in GameState. */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -46,7 +44,7 @@ public class Card {
 
     @Override
     public int hashCode() {
-        return Objects.hash(rank, suit);
+        return id();
     }
 
     @Override
