@@ -82,27 +82,27 @@ public class InputHandler {
         }
     }
 
-//    /** Asks for a number in [min, max]; blank input gives the default. */
-//    public int askNumber(String prompt, int min, int max, int defaultValue) {
-//        while (true) {
-//            String answer = readLine(prompt + " [" + defaultValue + "] : ");
-//            if (answer == null) {
-//                throw new InputEndedException();
-//            }
-//            if (answer.isBlank()) {
-//                return defaultValue;
-//            }
-//            try {
-//                int value = Integer.parseInt(answer.trim());
-//                if (value >= min && value <= max) {
-//                    return value;
-//                }
-//            } catch (NumberFormatException ignored) {
-//                // falls through to the error message
-//            }
-//            display.showError("Please enter a number from " + min + " to " + max + ".");
-//        }
-//    }
+    /** Asks for a number in [min, max]; blank input gives the default. */
+    public int askNumber(String prompt, int min, int max, int defaultValue) {
+        while (true) {
+            String answer = readLine(prompt + " [" + defaultValue + "] : ");
+            if (answer == null) {
+                throw new InputEndedException();
+            }
+            if (answer.isBlank()) {
+                return defaultValue;
+            }
+            try {
+                int value = Integer.parseInt(answer.trim());
+                if (value >= min && value <= max) {
+                    return value;
+                }
+            } catch (NumberFormatException ignored) {
+                // falls through to the error message
+            }
+            display.showError("Please enter a number from " + min + " to " + max + ".");
+        }
+    }
 
     /** Thrown when the input has ended (Ctrl+D / end of piped input). */
     public static class InputEndedException extends RuntimeException {

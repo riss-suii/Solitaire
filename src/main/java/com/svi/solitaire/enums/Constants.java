@@ -1,7 +1,7 @@
 package com.svi.solitaire.enums;
 
 /**
- * Fixed numbers that define a game of Klondike solitaire and the solver.
+ * Fixed numbers that define a game of Klondike solitaire.
  */
 public enum Constants {
     TABLEAU_COUNT(7),
@@ -14,10 +14,10 @@ public enum Constants {
     /** 6 face-down cards + a full King..Ace run of 13 = 19 at most. */
     MAX_TABLEAU_PILE_SIZE(20),
 
-    /** Search budget for one game (distinct positions explored, all attempts together). */
-    DEFAULT_MAX_NODES(300_000),
-    /** The budget is split over this many search attempts (see SolitaireStrategy). */
-    SEARCH_RESTARTS(40),
+    /** A game is abandoned after this many moves (draws included). */
+    MAX_GAME_MOVES(2_000),
+    /** A game is lost when the same position comes up more than this many times. */
+    MAX_POSITION_REPEATS(2),
 
     BANNER_WIDTH(78),
     DEFAULT_SIMULATION_GAMES(1_000),
