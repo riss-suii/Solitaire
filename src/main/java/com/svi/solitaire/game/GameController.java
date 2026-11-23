@@ -1,13 +1,12 @@
-package com.svi.solitaire.models.game;
+package com.svi.solitaire.game;
 
 import com.svi.solitaire.enums.Constants;
 import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.enums.MoveType;
 import com.svi.solitaire.models.GameState;
-import com.svi.solitaire.models.engine.MoveExecutor;
-import com.svi.solitaire.models.rules.GameRules;
-import com.svi.solitaire.models.strategy.PlayerView;
-import com.svi.solitaire.models.strategy.RuleBasedPlayer;
+import com.svi.solitaire.rules.GameRules;
+import com.svi.solitaire.strategy.PlayerView;
+import com.svi.solitaire.strategy.RuleBasedPlayer;
 import com.svi.solitaire.models.tableau.Manoeuvre;
 
 import java.util.HashMap;

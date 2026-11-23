@@ -1,4 +1,4 @@
-package com.svi.solitaire.models.simulation;
+package com.svi.solitaire.simulation;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

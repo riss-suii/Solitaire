@@ -1,4 +1,4 @@
-package com.svi.solitaire.models.shuffle;
+package com.svi.solitaire.shuffle;
 
 /** Perfect out-shuffle: the original top card stays on top. */
 public class PerfectOutShuffle extends PerfectShuffle {

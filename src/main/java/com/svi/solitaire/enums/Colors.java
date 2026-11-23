@@ -18,10 +18,6 @@ public enum Colors {
         this.code = code;
     }
 
-    public String getCode() {
-        return code;
-    }
-
     public String colorize(String text) {
         return code + text + RESET.code;
     }

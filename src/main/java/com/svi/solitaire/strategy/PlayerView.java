@@ -1,4 +1,4 @@
-package com.svi.solitaire.models.strategy;
+package com.svi.solitaire.strategy;
 
 import com.svi.solitaire.enums.Constants;
 import com.svi.solitaire.enums.DrawMove;

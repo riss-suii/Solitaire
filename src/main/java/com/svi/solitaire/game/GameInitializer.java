@@ -1,10 +1,10 @@
-package com.svi.solitaire.models.game;
+package com.svi.solitaire.game;
 
 import com.svi.solitaire.enums.Constants;
 import com.svi.solitaire.enums.DrawMove;
 import com.svi.solitaire.models.Deck;
 import com.svi.solitaire.models.GameState;
-import com.svi.solitaire.models.shuffle.ShuffleStrategy;
+import com.svi.solitaire.shuffle.ShuffleStrategy;
 
 /**
  * Shuffles a deck with the given strategy and deals a new Klondike layout.

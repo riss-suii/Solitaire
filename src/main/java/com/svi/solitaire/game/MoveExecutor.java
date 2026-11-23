@@ -1,4 +1,4 @@
-package com.svi.solitaire.models.engine;
+package com.svi.solitaire.game;
 
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;

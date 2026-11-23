@@ -1,4 +1,4 @@
-package com.svi.solitaire.models.rules;
+package com.svi.solitaire.rules;
 
 import com.svi.solitaire.enums.Constants;
 import com.svi.solitaire.enums.Rank;

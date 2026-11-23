@@ -1,4 +1,4 @@
-package com.svi.solitaire.models.shuffle;
+package com.svi.solitaire.shuffle;
 
 import com.svi.solitaire.models.Card;
 

@@ -1,12 +1,12 @@
-package com.svi.solitaire.models.simulation;
+package com.svi.solitaire.simulation;
 
 import com.svi.solitaire.enums.DrawMove;
 import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.models.Deck;
 import com.svi.solitaire.models.GameState;
-import com.svi.solitaire.models.game.GameController;
-import com.svi.solitaire.models.game.GameInitializer;
-import com.svi.solitaire.models.shuffle.ShuffleStrategy;
+import com.svi.solitaire.game.GameController;
+import com.svi.solitaire.game.GameInitializer;
+import com.svi.solitaire.shuffle.ShuffleStrategy;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntConsumer;

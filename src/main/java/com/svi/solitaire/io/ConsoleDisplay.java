@@ -7,8 +7,8 @@ import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.GameState;
-import com.svi.solitaire.models.rules.GameRules;
-import com.svi.solitaire.models.simulation.SimulationStatistics;
+import com.svi.solitaire.rules.GameRules;
+import com.svi.solitaire.simulation.SimulationStatistics;
 import com.svi.solitaire.models.tableau.Manoeuvre;
 
 import java.io.PrintStream;

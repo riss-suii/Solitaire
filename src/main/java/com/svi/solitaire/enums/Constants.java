@@ -11,7 +11,7 @@ public enum Constants {
 
     /** Cards left in the stock after dealing the tableau (52 - 28). */
     STOCK_SIZE(24),
-    /** 6 face-down cards + a full King..Ace run of 13 = 19 at most. */
+    /** 6 face-down cards + a full King.Ace run of 13 = 19 at most. */
     MAX_TABLEAU_PILE_SIZE(20),
 
     /** A game is abandoned after this many moves (draws included). */

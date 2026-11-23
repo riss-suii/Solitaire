@@ -1,6 +1,6 @@
 package com.svi.solitaire.models;
 
-import com.svi.solitaire.models.shuffle.ShuffleStrategy;
+import com.svi.solitaire.shuffle.ShuffleStrategy;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package com.svi.solitaire.models.game;
+package com.svi.solitaire.game;
 
 import com.svi.solitaire.enums.Constants;
 import com.svi.solitaire.enums.DrawMove;
@@ -8,13 +8,12 @@ import com.svi.solitaire.io.FileLoader;
 import com.svi.solitaire.io.InputHandler;
 import com.svi.solitaire.models.Deck;
 import com.svi.solitaire.models.GameState;
-import com.svi.solitaire.models.engine.MoveExecutor;
-import com.svi.solitaire.models.rules.GameRules;
-import com.svi.solitaire.models.shuffle.ShuffleFactory;
-import com.svi.solitaire.models.shuffle.ShuffleStrategy;
-import com.svi.solitaire.models.simulation.SimulationRunning;
-import com.svi.solitaire.models.simulation.SimulationStatistics;
-import com.svi.solitaire.models.strategy.RuleBasedPlayer;
+import com.svi.solitaire.rules.GameRules;
+import com.svi.solitaire.shuffle.ShuffleFactory;
+import com.svi.solitaire.shuffle.ShuffleStrategy;
+import com.svi.solitaire.simulation.SimulationRunning;
+import com.svi.solitaire.simulation.SimulationStatistics;
+import com.svi.solitaire.strategy.RuleBasedPlayer;
 import com.svi.solitaire.models.tableau.Manoeuvre;
 
 import java.io.PrintStream;

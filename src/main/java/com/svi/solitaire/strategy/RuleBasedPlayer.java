@@ -1,10 +1,10 @@
-package com.svi.solitaire.models.strategy;
+package com.svi.solitaire.strategy;
 
 import com.svi.solitaire.enums.Constants;
 import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
-import com.svi.solitaire.models.rules.GameRules;
+import com.svi.solitaire.rules.GameRules;
 import com.svi.solitaire.models.tableau.Manoeuvre;
 
 import java.util.List;
