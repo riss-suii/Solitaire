@@ -14,6 +14,11 @@ public class ShuffleFactory {
         this.random = random;
     }
 
+    /** Keeps the deck in the order it was loaded. */
+    public ShuffleStrategy none() {
+        return new NoShuffle();
+    }
+
     /** A random shuffle that uses the injected random source. */
     public ShuffleStrategy random() {
         return new RandomShuffle(random);

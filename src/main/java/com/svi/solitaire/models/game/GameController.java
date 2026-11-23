@@ -2,6 +2,7 @@ package com.svi.solitaire.models.game;
 
 import com.svi.solitaire.enums.Constants;
 import com.svi.solitaire.enums.DrawMove;
+import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.io.ConsoleDisplay;
 import com.svi.solitaire.io.FileLoader;
 import com.svi.solitaire.io.InputHandler;
@@ -34,6 +35,7 @@ public class GameController {
     private static final int SHUFFLE_RANDOM = 1;
     private static final int SHUFFLE_PERFECT_IN = 2;
     private static final int SHUFFLE_PERFECT_OUT = 3;
+    private static final int SHUFFLE_NONE = 4;
 
     private static final int MODE_WATCH = 1;
     private static final int MODE_SIMULATE = 2;
@@ -100,9 +102,10 @@ public class GameController {
             view.displayMainMenu();
             DrawMove drawMove = DrawMove.fromCount(input.askDrawCount());
 
-            view.showMenu("SELECT SHUFFLE", "[1] Random", "[2] Perfect In", "[3] Perfect Out");
+            view.showMenu("SELECT SHUFFLE", "[1] Random", "[2] Perfect In", "[3] Perfect Out",
+                    "[4] No shuffle (use the deck as loaded)");
             int shuffle = input.askChoice("Enter your choice : ",
-                    SHUFFLE_RANDOM, SHUFFLE_PERFECT_IN, SHUFFLE_PERFECT_OUT);
+                    SHUFFLE_RANDOM, SHUFFLE_PERFECT_IN, SHUFFLE_PERFECT_OUT, SHUFFLE_NONE);
 
             view.showMenu("SELECT MODE", "[1] Watch one game being played",
                     "[2] Run a simulation (win-rate statistics)");
@@ -145,6 +148,8 @@ public class GameController {
         ShuffleStrategy shuffleStrategy;
         if (shuffle == SHUFFLE_RANDOM) {
             shuffleStrategy = shuffles.random();
+        } else if (shuffle == SHUFFLE_NONE) {
+            shuffleStrategy = shuffles.none();
         } else {
             int rounds = input.askNumber("Number of perfect shuffles", 1, 100, 1);
             shuffleStrategy = shuffle == SHUFFLE_PERFECT_IN ? shuffles.perfectIn(rounds) : shuffles.perfectOut(rounds);
@@ -162,7 +167,7 @@ public class GameController {
      * @param state          the dealt game (it is played out in place)
      * @param showEveryBoard true: print the board after every step; false: only the steps and the final board
      */
-    public void play(GameState state, boolean showEveryBoard) {
+    public GameStatus play(GameState state, boolean showEveryBoard) {
         view.showMessage("Initial deal:");
         view.showBoard(state);
 
@@ -186,6 +191,7 @@ public class GameController {
             view.showBoard(state);
         }
         view.showResult(outcome.status(), outcome.moves(), state);
+        return outcome.status();
     }
 
     // ------------------------------------------------------------- simulation
@@ -202,6 +208,11 @@ public class GameController {
             // one seeded Random per game: reproducible and safe to use from parallel workers
             shuffleFor = i -> shuffles.seeded(baseSeed + i);
             shuffleName = "Random (seed " + baseSeed + ")";
+        } else if (shuffle == SHUFFLE_NONE) {
+            view.showMessage("An unshuffled deck always deals the same game, so one game is played.");
+            games = 1;
+            shuffleFor = i -> shuffles.none();
+            shuffleName = shuffles.none().getName();
         } else {
             view.showMessage("Perfect shuffles are deterministic, so game N uses N shuffle rounds (1..N).");
             games = input.askNumber("Highest number of rounds to test", 1, 200, 52);
