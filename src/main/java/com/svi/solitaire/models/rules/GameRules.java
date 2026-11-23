@@ -6,7 +6,6 @@ import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.models.tableau.Manoeuvre;
-import com.svi.solitaire.utils.CardUtil;
 
 /** Klondike rules: what may be stacked where, which moves are legal, and when the game is won. */
 public class GameRules {
@@ -18,12 +17,18 @@ public class GameRules {
         if (target == null) {
             return moving.getRank() == Rank.KING;
         }
-        return CardUtil.canStackOnTableau(moving, target);
+        return moving.isRed() != target.isRed()
+                && target.getRank().getValue() == moving.getRank().getValue() + 1;
     }
 
     /** A card goes on its foundation if it is the next rank up. */
     public boolean canPlaceOnFoundation(Card card, int foundationHeight) {
         return card.getRank().getValue() == foundationHeight + 1;
+    }
+
+    /** A draw turns over the draw-mode count (1 or 3) of cards, or whatever is left in the stock. */
+    public int cardsToDraw(GameState state) {
+        return Math.min(state.getDrawMove().getCount(), state.stockSize());
     }
 
     public boolean isWon(GameState state) {

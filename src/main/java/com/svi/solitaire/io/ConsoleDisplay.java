@@ -7,6 +7,7 @@ import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.GameState;
+import com.svi.solitaire.models.rules.GameRules;
 import com.svi.solitaire.models.simulation.SimulationStatistics;
 import com.svi.solitaire.models.tableau.Manoeuvre;
 import com.svi.solitaire.utils.CardUtil;
@@ -18,27 +19,29 @@ import java.io.PrintStream;
  * colors are ANSI escape codes and can be switched off.
  */
 public class ConsoleDisplay {
-    private static final String FACE_DOWN = "[###]";
-    private static final String EMPTY_SLOT = "[   ]";
-    private static final int CELL_WIDTH = 5;
-    private static final int STOCK_COLUMN_WIDTH = 13;
-    private static final int WASTE_COLUMN_WIDTH = 18;
+    private static final String FACE_DOWN = "[####]";
+    private static final String EMPTY_SLOT = "[    ]";
+    private static final int CELL_WIDTH = 6;
+    private static final int STOCK_COLUMN_WIDTH = 14;
+    private static final int WASTE_COLUMN_WIDTH = 21;
     private static final Suit[] FOUNDATION_ORDER = {Suit.SPADES, Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS};
     private static final int PILES = Constants.TABLEAU_COUNT.getValue();
     private static final int WIDTH = Constants.BANNER_WIDTH.getValue();
 
     private final PrintStream out;
     private final boolean useColor;
+    private final GameRules rules;
 
-    public ConsoleDisplay(PrintStream out, boolean color) {
+    public ConsoleDisplay(PrintStream out, boolean color, GameRules rules) {
         this.out = out;
         this.useColor = color;
+        this.rules = rules;
     }
 
     // ------------------------------------------------------------------ menus
 
     public void displayMainMenu() {
-        out.println(style(Colors.CYAN, "=========================== ♠ KLONDIKE SOLITAIRE ♥ ==========================="));
+        out.println(style(Colors.CYAN, "=".repeat(29) + " KLONDIKE SOLITAIRE " + "=".repeat(29)));
         out.println(style(Colors.BOLD, "                 Every move counts. Every card has its place.\n"));
         out.println(style(Colors.BOLD, "                               SELECT DRAW MODE \n"));
         out.println(style(Colors.BOLD, "                               [1] Draw 1 Card"));
@@ -119,7 +122,7 @@ public class ConsoleDisplay {
         for (Suit suit : FOUNDATION_ORDER) {
             Card top = state.topFoundationCard(suit);
             if (top == null) {
-                text.append(style(suit.isRed() ? Colors.RED : Colors.RESET, "[ " + suit.getIcon() + " ]"));
+                text.append(style(suit.isRed() ? Colors.RED : Colors.RESET, "[  " + suit.getSymbol() + " ]"));
             } else {
                 text.append(style(colorOf(top), cardCell(top)));
             }
@@ -139,9 +142,9 @@ public class ConsoleDisplay {
         return style(colorOf(card), cardCell(card));
     }
 
-    /** "[ 4♥]" / "[10♥]": the card right-aligned in three characters. */
+    /** "[ 4-H]" / "[10-H]": the card right-aligned in four characters. */
     private static String cardCell(Card card) {
-        return "[" + String.format("%3s", card) + "]";
+        return "[" + String.format("%4s", card) + "]";
     }
 
     // ------------------------------------------------------------------ moves
@@ -150,7 +153,7 @@ public class ConsoleDisplay {
         Card card = CardUtil.movingCard(state, move);
         return switch (move.type()) {
             case DRAW -> {
-                int drawn = Math.min(state.getDrawMove().getCount(), state.stockSize());
+                int drawn = rules.cardsToDraw(state);
                 yield "Draw " + drawn + (drawn == 1 ? " card" : " cards") + " from the stock";
             }
             case RECYCLE -> "Stock is empty: waste turned back into the stock (no shuffle)";
@@ -168,9 +171,9 @@ public class ConsoleDisplay {
     public void showResult(GameStatus status, int moves, GameState finalState) {
         out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
         if (status == GameStatus.WON) {
-            out.println(style(Colors.YELLOW, center("★  YOU WIN!  All 52 cards are on the foundations.  ★")));
+            out.println(style(Colors.GREEN, center("YOU WIN!  All 52 cards are on the foundations.")));
         } else {
-            out.println(style(Colors.RED, center("No winning line was found for this deal.")));
+            out.println(style(Colors.YELLOW, center("No winning line was found for this deal.")));
         }
         out.println(center("Moves: " + moves + "    Cards on foundations: "
                 + finalState.totalFoundationCards() + "/" + Constants.TOTAL_CARDS.getValue()));

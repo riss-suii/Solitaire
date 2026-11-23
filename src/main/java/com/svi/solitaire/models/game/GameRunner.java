@@ -74,7 +74,7 @@ public class GameRunner {
         GameController controller = new GameController(player, executor, rules);
 
         PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        ConsoleDisplay view = new ConsoleDisplay(out, useColor);
+        ConsoleDisplay view = new ConsoleDisplay(out, useColor, rules);
         InputHandler input = new InputHandler(new Scanner(System.in, StandardCharsets.UTF_8), view);
         FileLoader fileLoader = new FileLoader(view);
         GameInitializer initializer = new GameInitializer();

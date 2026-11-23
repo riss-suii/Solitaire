@@ -3,9 +3,6 @@ package com.svi.solitaire.models;
 import com.svi.solitaire.enums.Constants;
 import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
-import com.svi.solitaire.utils.CardUtil;
-
-import java.util.Objects;
 
 public class Card {
     private final Rank rank;
@@ -49,6 +46,8 @@ public class Card {
 
     @Override
     public String toString() {
-        return CardUtil.label(this);
+        {
+            return this.rank.getSymbol() + "-" + this.suit.getSymbol();
+        }
     }
 }

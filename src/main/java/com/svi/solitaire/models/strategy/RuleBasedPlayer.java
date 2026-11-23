@@ -43,16 +43,16 @@ public class RuleBasedPlayer {
     private static final int PILES = Constants.TABLEAU_COUNT.getValue();
 
     // priorities, highest first
-    private static final int FREE_TO_FOUNDATION = 10_000;
-    private static final int KING_STACK_TO_EMPTY = 9_000;
-    private static final int FLIP = 8_000;
-    private static final int WASTE_KING_TO_EMPTY = 7_000;
-    private static final int EMPTY_A_COLUMN = 6_500;
-    private static final int WASTE_TO_TABLEAU = 5_000;
-    private static final int STUCK_TO_FOUNDATION = 4_000;
-    private static final int STUCK_UNCOVER = 3_500;
-    private static final int STUCK_EMPTY_A_COLUMN = 3_000;
-    private static final int DRAW = 1_000;
+    private static final int FREE_TO_FOUNDATION = 10000;
+    private static final int KING_STACK_TO_EMPTY = 9000;
+    private static final int FLIP = 8000;
+    private static final int WASTE_KING_TO_EMPTY = 7000;
+    private static final int EMPTY_A_COLUMN = 6500;
+    private static final int WASTE_TO_TABLEAU = 5000;
+    private static final int STUCK_TO_FOUNDATION = 4000;
+    private static final int STUCK_UNCOVER = 3500;
+    private static final int STUCK_EMPTY_A_COLUMN = 3000;
+    private static final int DRAW = 1000;
     private static final int RECYCLE = 900;
 
     private final GameRules rules;
