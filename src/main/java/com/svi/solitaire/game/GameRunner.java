@@ -74,7 +74,10 @@ public class GameRunner {
 
         PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         ConsoleDisplay view = new ConsoleDisplay(out, useColor, rules);
-        InputHandler input = new InputHandler(new Scanner(System.in, StandardCharsets.UTF_8), view);
+
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
+        InputHandler input = new InputHandler(scanner, view);
+
         FileLoader fileLoader = new FileLoader(view);
         GameInitializer initializer = new GameInitializer();
         ShuffleFactory shuffles = new ShuffleFactory(new Random());
@@ -86,6 +89,8 @@ public class GameRunner {
             runner.run();
         } catch (InputHandler.InputEndedException e) {
             out.println();
+        } finally {
+            scanner.close();
         }
     }
 
