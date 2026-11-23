@@ -103,7 +103,7 @@ public class GameRunner {
             DrawMove drawMove = DrawMove.fromCount(input.askDrawCount());
 
             view.showMenu("SELECT SHUFFLE", "[1] Random", "[2] Perfect In", "[3] Perfect Out",
-                    "[4] No shuffle (use the deck as loaded)");
+                    "[4] No shuffle");
             int shuffle = input.askChoice("Enter your choice : ",
                     SHUFFLE_RANDOM, SHUFFLE_PERFECT_IN, SHUFFLE_PERFECT_OUT, SHUFFLE_NONE);
 
@@ -120,9 +120,9 @@ public class GameRunner {
             again = input.askChoice("Enter your choice : ", 0, 1, 2);
             if (again == 2) {
                 deck = promptForDeck();
-                if (deck == null) {
-                    return;                               // input ended
-                }
+            }
+            if (deck == null) {
+                return;                               // input ended
             }
         } while (again != 0);
         view.showMessage("Thanks for playing!");
@@ -151,7 +151,7 @@ public class GameRunner {
         } else if (shuffle == SHUFFLE_NONE) {
             shuffleStrategy = shuffles.none();
         } else {
-            int rounds = input.askNumber("Number of perfect shuffles", 1, 100, 1);
+            int rounds = input.askNumber("Number of perfect shuffles : ", 1, 100);
             shuffleStrategy = shuffle == SHUFFLE_PERFECT_IN ? shuffles.perfectIn(rounds) : shuffles.perfectOut(rounds);
         }
         view.showMessage("Shuffle: " + shuffleStrategy.getName() + "   |   Draw " + drawMove.getCount());
@@ -202,20 +202,19 @@ public class GameRunner {
         String shuffleName;
 
         if (shuffle == SHUFFLE_RANDOM) {
-            games = input.askNumber("Number of games", 1, Constants.MAX_SIMULATION_GAMES.getValue(),
-                    Constants.DEFAULT_SIMULATION_GAMES.getValue());
+            games = input.askNumber("Number of games : ", 1, Constants.MAX_SIMULATION_GAMES.getValue());
             long baseSeed = System.nanoTime();
             // one seeded Random per game: reproducible and safe to use from parallel workers
             shuffleFor = i -> shuffles.seeded(baseSeed + i);
-            shuffleName = "Random (seed " + baseSeed + ")";
+            shuffleName = "Random";
         } else if (shuffle == SHUFFLE_NONE) {
             view.showMessage("An unshuffled deck always deals the same game, so one game is played.");
             games = 1;
             shuffleFor = i -> shuffles.none();
             shuffleName = shuffles.none().getName();
         } else {
-            view.showMessage("Perfect shuffles are deterministic, so game N uses N shuffle rounds (1..N).");
-            games = input.askNumber("Highest number of rounds to test", 1, 200, 52);
+            view.showMessage("Each game will use one more perfect shuffle than the previous game.");
+            games = input.askNumber("Enter the number of games to test : ", 1, 200);
             boolean in = shuffle == SHUFFLE_PERFECT_IN;
             shuffleFor = i -> in ? shuffles.perfectIn(i + 1) : shuffles.perfectOut(i + 1);
             shuffleName = (in ? "Perfect In" : "Perfect Out") + " (rounds 1.." + games + ")";

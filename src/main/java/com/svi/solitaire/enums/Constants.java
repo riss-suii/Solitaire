@@ -15,13 +15,12 @@ public enum Constants {
     MAX_TABLEAU_PILE_SIZE(20),
 
     /** A game is abandoned after this many moves (draws included). */
-    MAX_GAME_MOVES(2_000),
+    MAX_GAME_MOVES(2000),
     /** A game is lost when the same position comes up more than this many times. */
     MAX_POSITION_REPEATS(2),
 
     BANNER_WIDTH(78),
-    DEFAULT_SIMULATION_GAMES(1_000),
-    MAX_SIMULATION_GAMES(100_000);
+    MAX_SIMULATION_GAMES(100000);
 
     private final int value;
 

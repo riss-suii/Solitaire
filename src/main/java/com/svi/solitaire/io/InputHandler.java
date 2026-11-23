@@ -29,12 +29,16 @@ public class InputHandler {
         }
     }
 
-    /** Asks for 1 or 3 cards per draw. Repeats until valid; blank or ended input gives 1. */
+    /**
+     * Asks for 1 or 3 cards per draw.
+     * Repeats until valid input is entered.
+     * Throws {@link InputEndedException} if input ends.
+     */
     public int askDrawCount() {
         while (true) {
             String answer = readLine("Enter your choice : ");
-            if (answer == null || answer.isBlank()) {
-                return 1;
+            if (answer == null) {
+                throw new InputEndedException();
             }
             String trimmed = answer.trim();
             if (trimmed.equals("1") || trimmed.equals("3")) {
@@ -83,14 +87,11 @@ public class InputHandler {
     }
 
     /** Asks for a number in [min, max]; blank input gives the default. */
-    public int askNumber(String prompt, int min, int max, int defaultValue) {
+    public int askNumber(String prompt, int min, int max) {
         while (true) {
-            String answer = readLine(prompt + " [" + defaultValue + "] : ");
+            String answer = readLine(prompt);
             if (answer == null) {
                 throw new InputEndedException();
-            }
-            if (answer.isBlank()) {
-                return defaultValue;
             }
             try {
                 int value = Integer.parseInt(answer.trim());

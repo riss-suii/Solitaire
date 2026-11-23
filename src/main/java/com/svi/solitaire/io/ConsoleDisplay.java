@@ -168,9 +168,9 @@ public class ConsoleDisplay {
     public void showResult(GameStatus status, int moves, GameState finalState) {
         out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
         if (status == GameStatus.WON) {
-            out.println(style(Colors.GREEN, center("★  YOU WIN!  All 52 cards are on the foundations.  ★")));
+            out.println(style(Colors.YELLOW, center("★  YOU WIN!  All 52 cards are on the foundations.  ★")));
         } else {
-            out.println(style(Colors.YELLOW, center("No winning line was found for this deal.")));
+            out.println(style(Colors.RED, center("No winning line was found for this deal.")));
         }
         out.println(center("Moves: " + moves + "    Cards on foundations: "
                 + finalState.totalFoundationCards() + "/" + Constants.TOTAL_CARDS.getValue()));
