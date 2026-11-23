@@ -7,7 +7,6 @@ import com.svi.solitaire.enums.Suit;
 public class Card {
     private final Rank rank;
     private final Suit suit;
-    private boolean faceUp;
 
     public Card(Rank rank, Suit suit) {
         this.rank = rank;

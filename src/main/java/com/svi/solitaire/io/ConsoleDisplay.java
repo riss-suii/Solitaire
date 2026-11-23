@@ -10,7 +10,6 @@ import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.models.rules.GameRules;
 import com.svi.solitaire.models.simulation.SimulationStatistics;
 import com.svi.solitaire.models.tableau.Manoeuvre;
-import com.svi.solitaire.utils.CardUtil;
 
 import java.io.PrintStream;
 
@@ -150,7 +149,7 @@ public class ConsoleDisplay {
     // ------------------------------------------------------------------ moves
 
     public String describe(Manoeuvre move, GameState state) {
-        Card card = CardUtil.movingCard(state, move);
+        Card card = GameRules.movingCard(state, move);
         return switch (move.type()) {
             case DRAW -> {
                 int drawn = rules.cardsToDraw(state);

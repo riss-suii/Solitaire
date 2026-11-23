@@ -31,6 +31,18 @@ public class GameRules {
         return Math.min(state.getDrawMove().getCount(), state.stockSize());
     }
 
+    /** The card a move picks up (the bottom card of the run for multi-card moves); null for stock moves. */
+    public static Card movingCard(GameState state, Manoeuvre move) {
+        return switch (move.type()) {
+            case WASTE_TO_TABLEAU, WASTE_TO_FOUNDATION -> state.wasteTop();
+            case TABLEAU_TO_TABLEAU ->
+                    state.tableauCard(move.from(), state.tableauSize(move.from()) - move.count());
+            case TABLEAU_TO_FOUNDATION -> state.topTableauCard(move.from());
+            case FOUNDATION_TO_TABLEAU -> state.topFoundationCard(Suit.values()[move.from()]);
+            case DRAW, RECYCLE -> null;
+        };
+    }
+
     public boolean isWon(GameState state) {
         return state.totalFoundationCards() == Constants.TOTAL_CARDS.getValue();
     }
@@ -41,13 +53,13 @@ public class GameRules {
             case DRAW -> state.stockSize() > 0;
             case RECYCLE -> state.stockSize() == 0 && state.wasteSize() > 0;
             case WASTE_TO_FOUNDATION -> {
-                Card card = state.wasteTop();
+                Card card = movingCard(state, move);
                 yield card != null
                         && move.to() == card.getSuit().ordinal()
                         && canPlaceOnFoundation(card, state.foundationHeight(card.getSuit()));
             }
             case WASTE_TO_TABLEAU -> {
-                Card card = state.wasteTop();
+                Card card = movingCard(state, move);
                 yield card != null && isPile(move.to()) && canPlaceOnTableau(card, state.topTableauCard(move.to()));
             }
             case TABLEAU_TO_FOUNDATION -> {

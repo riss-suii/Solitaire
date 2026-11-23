@@ -5,7 +5,6 @@ import com.svi.solitaire.enums.DrawMove;
 import com.svi.solitaire.models.Deck;
 import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.models.shuffle.ShuffleStrategy;
-import com.svi.solitaire.utils.DeckUtil;
 
 /**
  * Shuffles a deck with the given strategy and deals a new Klondike layout.
@@ -26,9 +25,6 @@ public class GameInitializer {
      * left untouched; the cards are dealt from a copy.
      */
     public GameState deal(Deck deck, DrawMove drawMove) {
-        if (!DeckUtil.isCompleteDeck(deck.getCards())) {
-            throw new IllegalArgumentException("A deck must contain each of the 52 cards exactly once");
-        }
         Deck remaining = new Deck(deck.getCards());
         int piles = Constants.TABLEAU_COUNT.getValue();
         GameState state = new GameState(drawMove);

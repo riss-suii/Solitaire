@@ -87,14 +87,6 @@ public class GameState {
         return foundation.total();
     }
 
-    public int totalFaceDownCards() {
-        int total = 0;
-        for (int i = 0; i < PILES; i++) {
-            total += faceDownCount(i);
-        }
-        return total;
-    }
-
     public int stockSize() {
         return stock.size();
     }
