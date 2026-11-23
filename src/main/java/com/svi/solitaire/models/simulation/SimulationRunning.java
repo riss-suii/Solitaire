@@ -4,8 +4,8 @@ import com.svi.solitaire.enums.DrawMove;
 import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.models.Deck;
 import com.svi.solitaire.models.GameState;
+import com.svi.solitaire.models.game.GameController;
 import com.svi.solitaire.models.game.GameInitializer;
-import com.svi.solitaire.models.game.GameRunner;
 import com.svi.solitaire.models.shuffle.ShuffleStrategy;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,11 +16,11 @@ import java.util.stream.IntStream;
 /** Plays many games without any display, spread over all CPU cores, and gathers statistics. */
 public class SimulationRunning {
 
-    private final GameRunner runner;
+    private final GameController controller;
     private final GameInitializer initializer;
 
-    public SimulationRunning(GameRunner runner, GameInitializer initializer) {
-        this.runner = runner;
+    public SimulationRunning(GameController controller, GameInitializer initializer) {
+        this.controller = controller;
         this.initializer = initializer;
     }
 
@@ -40,7 +40,7 @@ public class SimulationRunning {
         IntStream.range(0, games).parallel().forEach(i -> {
             GameState state = initializer.newGame(startingDeck, shuffleFor.apply(i), drawMove);
 
-            GameRunner.Outcome outcome = runner.play(state, null);
+            GameController.Outcome outcome = controller.play(state, null);
             stats.record(outcome.status() == GameStatus.WON);
 
             int done = finished.incrementAndGet();

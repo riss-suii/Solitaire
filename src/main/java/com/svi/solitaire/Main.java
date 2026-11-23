@@ -1,9 +1,9 @@
 package com.svi.solitaire;
 
-import com.svi.solitaire.models.game.GameController;
+import com.svi.solitaire.models.game.GameRunner;
 
 public class Main {
     static void main(String[] args) {
-        GameController.launch(args);
+        GameRunner.launch(args);
     }
 }
