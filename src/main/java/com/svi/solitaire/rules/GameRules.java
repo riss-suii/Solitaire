@@ -25,10 +25,10 @@ public class GameRules {
      */
     public boolean canPlaceOnTableau(Card moving, Card target) {
         if (target == null) {
-            return moving.getRank() == Rank.KING;
+            return moving.rank() == Rank.KING;
         }
         return moving.isRed() != target.isRed()
-                && target.getRank().getValue() == moving.getRank().getValue() + 1;
+                && target.rank().getValue() == moving.rank().getValue() + 1;
     }
 
     /**
@@ -39,7 +39,7 @@ public class GameRules {
      * @return true if the card is the next one the foundation needs
      */
     public boolean canPlaceOnFoundation(Card card, int foundationHeight) {
-        return card.getRank().getValue() == foundationHeight + 1;
+        return card.rank().getValue() == foundationHeight + 1;
     }
 
     /**
@@ -94,8 +94,8 @@ public class GameRules {
             case WASTE_TO_FOUNDATION -> {
                 Card card = movingCard(state, move);
                 yield card != null
-                        && move.to() == card.getSuit().ordinal()
-                        && canPlaceOnFoundation(card, state.getFoundationHeight(card.getSuit()));
+                        && move.to() == card.suit().ordinal()
+                        && canPlaceOnFoundation(card, state.getFoundationHeight(card.suit()));
             }
             case WASTE_TO_TABLEAU -> {
                 Card card = movingCard(state, move);
@@ -107,8 +107,8 @@ public class GameRules {
                 }
                 Card card = state.getTopTableauCard(move.from());
                 yield card != null
-                        && move.to() == card.getSuit().ordinal()
-                        && canPlaceOnFoundation(card, state.getFoundationHeight(card.getSuit()));
+                        && move.to() == card.suit().ordinal()
+                        && canPlaceOnFoundation(card, state.getFoundationHeight(card.suit()));
             }
             case TABLEAU_TO_TABLEAU -> {
                 if (!isPile(move.from()) || !isPile(move.to()) || move.from() == move.to()) {

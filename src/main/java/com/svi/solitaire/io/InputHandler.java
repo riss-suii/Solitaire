@@ -1,6 +1,5 @@
 package com.svi.solitaire.io;
 
-import java.io.Serial;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -115,8 +114,6 @@ public class InputHandler {
 
     /** Thrown when the input has ended (Ctrl+D / end of piped input). */
     public static class InputEndedException extends RuntimeException {
-        @Serial
-        private static final long serialVersionUID = 1L;
 
         /** Creates the exception with the message {@code Input ended}. */
         public InputEndedException() {

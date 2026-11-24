@@ -35,11 +35,11 @@ public class MoveExecutor {
             case DRAW -> draw(state);
             case RECYCLE -> recycle(state);
             case WASTE_TO_TABLEAU -> state.addTableauTop(move.to(), takeWasteTop(state));
-            case WASTE_TO_FOUNDATION -> state.addToFoundation(takeWasteTop(state).getSuit());
+            case WASTE_TO_FOUNDATION -> state.addToFoundation(takeWasteTop(state).suit());
             case TABLEAU_TO_FOUNDATION -> {
                 Card card = state.removeTableauTop(move.from());
                 state.revealTopIfHidden(move.from());
-                state.addToFoundation(card.getSuit());
+                state.addToFoundation(card.suit());
             }
             case TABLEAU_TO_TABLEAU -> moveRun(state, move);
             case FOUNDATION_TO_TABLEAU -> {

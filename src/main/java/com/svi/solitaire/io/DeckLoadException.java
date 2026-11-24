@@ -1,15 +1,11 @@
 package com.svi.solitaire.io;
 
-import java.io.Serial;
 
 /**
  * Thrown when a deck file cannot be read or does not hold a valid 52-card deck.
  * The message says what is wrong and is suitable to show to the user.
  */
 public class DeckLoadException extends Exception {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     /**
      * Creates the exception with a message.

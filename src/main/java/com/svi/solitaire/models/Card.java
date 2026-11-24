@@ -7,19 +7,14 @@ import com.svi.solitaire.enums.Suit;
 /**
  * An immutable playing card: a rank and a suit. Use {@code CardFactory} to get the shared instances.
  */
-public class Card {
-    private final Rank rank;
-    private final Suit suit;
-
+public record Card(Rank rank, Suit suit) {
     /**
      * Creates a card.
      *
      * @param rank the rank of the card
      * @param suit the suit of the card
      */
-    public Card(Rank rank, Suit suit) {
-        this.rank = rank;
-        this.suit = suit;
+    public Card {
     }
 
     /**
@@ -27,7 +22,8 @@ public class Card {
      *
      * @return the rank of the card
      */
-    public Rank getRank() {
+    @Override
+    public Rank rank() {
         return rank;
     }
 
@@ -36,7 +32,8 @@ public class Card {
      *
      * @return the suit of the card
      */
-    public Suit getSuit() {
+    @Override
+    public Suit suit() {
         return suit;
     }
 
@@ -58,12 +55,14 @@ public class Card {
         return suit.ordinal() * GameConstants.CARDS_PER_SUIT + rank.ordinal();
     }
 
-    /** Identity is rank + suit. Whether a card is face up is tracked by its tableau pile in GameState. */
+    /**
+     * Identity is rank + suit. Whether a card is face up is tracked by its tableau pile in GameState.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Card other)) return false;
-        return rank == other.rank && suit == other.suit;
+        if (!(o instanceof Card(Rank rank1, Suit suit1))) return false;
+        return rank == rank1 && suit == suit1;
     }
 
     @Override

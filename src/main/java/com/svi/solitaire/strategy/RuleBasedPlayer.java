@@ -73,7 +73,7 @@ public class RuleBasedPlayer {
      * @return the next move, or empty when none is possible
      */
     public Optional<BoardMove> nextMove(PlayerView view, boolean stuck) {
-        // Rule 4: once every talon card has been flipped the player remembers them all, so it can tell
+        // once every talon card has been flipped the player remembers them all, so it can tell
         // that going through the stock again is pointless instead of cycling until a position repeats.
         boolean talonUseless = isTalonKnown(view) && !hasPlayableTalonCard(view);
         stuck = stuck || talonUseless;
@@ -101,7 +101,7 @@ public class RuleBasedPlayer {
             Card card = waste.getLast();
             if (fitsFoundation(view, card)) {
                 int score = isFree(view, card) ? FREE_TO_FOUNDATION : stuck ? STUCK_TO_FOUNDATION - 100 : 0;
-                best.offer(BoardMove.wasteToFoundation(card.getSuit().ordinal()), score);
+                best.offer(BoardMove.wasteToFoundation(card.suit().ordinal()), score);
             }
         }
         for (int pile = 0; pile < PILES; pile++) {
@@ -110,13 +110,13 @@ public class RuleBasedPlayer {
                 continue;
             }
             int score = isFree(view, card) ? FREE_TO_FOUNDATION : stuck ? STUCK_TO_FOUNDATION : 0;
-            best.offer(BoardMove.tableauToFoundation(pile, card.getSuit().ordinal()), score + pile);
+            best.offer(BoardMove.tableauToFoundation(pile, card.suit().ordinal()), score + pile);
         }
     }
 
     /** Aces and 2s are never needed in the tableau; others only when both parents are already up. */
     private boolean isFree(PlayerView view, Card card) {
-        int rank = card.getRank().getValue();
+        int rank = card.rank().getValue();
         if (rank <= 2) {
             return true;
         }
@@ -134,7 +134,7 @@ public class RuleBasedPlayer {
     }
 
     private boolean fitsFoundation(PlayerView view, Card card) {
-        return rules.canPlaceOnFoundation(card, view.foundationHeight(card.getSuit().ordinal()));
+        return rules.canPlaceOnFoundation(card, view.foundationHeight(card.suit().ordinal()));
     }
 
     // ------------------------------------------------------------- tableau runs
@@ -225,20 +225,20 @@ public class RuleBasedPlayer {
      */
     private boolean isKingReady(PlayerView view) {
         for (Card card : view.waste()) {
-            if (card.getRank() == Rank.KING) {
+            if (card.rank() == Rank.KING) {
                 return true;
             }
         }
         if (view.knownStock() != null) {
             for (Card card : view.knownStock()) {
-                if (card.getRank() == Rank.KING) {
+                if (card.rank() == Rank.KING) {
                     return true;
                 }
             }
         }
         for (int pile = 0; pile < PILES; pile++) {
             List<Card> run = view.faceUpCards(pile);
-            if (!run.isEmpty() && run.getFirst().getRank() == Rank.KING && view.faceDownCount(pile) > 0) {
+            if (!run.isEmpty() && run.getFirst().rank() == Rank.KING && view.faceDownCount(pile) > 0) {
                 return true;
             }
         }
