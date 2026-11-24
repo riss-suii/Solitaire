@@ -1,13 +1,13 @@
 package com.svi.solitaire.game;
 
-import com.svi.solitaire.enums.Constants;
+import com.svi.solitaire.constants.PlayLimits;
 import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.enums.MoveType;
 import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.rules.GameRules;
 import com.svi.solitaire.strategy.PlayerView;
 import com.svi.solitaire.strategy.RuleBasedPlayer;
-import com.svi.solitaire.models.tableau.Manoeuvre;
+import com.svi.solitaire.models.BoardMove;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,11 +17,11 @@ import java.util.Optional;
  * Controls one game from start to finish, one move at a time. Before each move the player is shown
  * only a {@link PlayerView}, never the hidden cards. Stateless, so it can be shared across threads.
  */
-public class GameController {
+public class GameEngine {
 
     /** Called around every move (for the console display). */
     public interface Listener {
-        default void beforeMove(int number, Manoeuvre move, GameState state) {
+        default void beforeMove(int number, BoardMove move, GameState state) {
         }
 
         default void afterMove(GameState state) {
@@ -39,7 +39,7 @@ public class GameController {
     private final MoveExecutor executor;
     private final GameRules rules;
 
-    public GameController(RuleBasedPlayer player, MoveExecutor executor, GameRules rules) {
+    public GameEngine(RuleBasedPlayer player, MoveExecutor executor, GameRules rules) {
         this.player = player;
         this.executor = executor;
         this.rules = rules;
@@ -55,17 +55,17 @@ public class GameController {
         boolean stockSeen = false;       // true once the stock has been turned over: its order is known
         int moves = 0;
 
-        while (!rules.isWon(state) && moves < Constants.MAX_GAME_MOVES.getValue()) {
+        while (!rules.isWon(state) && moves < PlayLimits.MAX_GAME_MOVES) {
             int seen = visits.merge(state.exactFingerprint(), 1, Integer::sum);
-            if (seen > Constants.MAX_POSITION_REPEATS.getValue()) {
+            if (seen > PlayLimits.MAX_POSITION_REPEATS) {
                 break;
             }
             // the same position again means the stock has been through a full cycle with nothing to play
-            Optional<Manoeuvre> choice = player.nextMove(PlayerView.of(state, stockSeen), seen > 1);
+            Optional<BoardMove> choice = player.nextMove(PlayerView.of(state, stockSeen), seen > 1);
             if (choice.isEmpty()) {
                 break;
             }
-            Manoeuvre move = choice.get();
+            BoardMove move = choice.get();
             if (!rules.isValid(state, move)) {
                 throw new IllegalStateException("Player chose an illegal move: " + move);
             }

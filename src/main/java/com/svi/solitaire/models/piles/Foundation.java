@@ -1,6 +1,6 @@
-package com.svi.solitaire.models.tableau;
+package com.svi.solitaire.models.piles;
 
-import com.svi.solitaire.enums.Constants;
+import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
@@ -14,7 +14,7 @@ public class Foundation {
     private final int[] heights;
 
     public Foundation() {
-        this.heights = new int[Constants.FOUNDATION_COUNT.getValue()];
+        this.heights = new int[GameConstants.FOUNDATION_COUNT];
     }
 
     public int height(Suit suit) {

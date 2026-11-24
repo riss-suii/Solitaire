@@ -1,9 +1,9 @@
 package com.svi.solitaire.game;
 
-import com.svi.solitaire.enums.Constants;
-import com.svi.solitaire.enums.DrawMove;
-import com.svi.solitaire.enums.GameStatus;
+import com.svi.solitaire.constants.PlayLimits;
+import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.io.ConsoleDisplay;
+import com.svi.solitaire.io.DeckLoadException;
 import com.svi.solitaire.io.FileLoader;
 import com.svi.solitaire.io.InputHandler;
 import com.svi.solitaire.models.Deck;
@@ -11,10 +11,10 @@ import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.rules.GameRules;
 import com.svi.solitaire.shuffle.ShuffleFactory;
 import com.svi.solitaire.shuffle.ShuffleStrategy;
-import com.svi.solitaire.simulation.SimulationRunning;
+import com.svi.solitaire.simulation.SimulationRunner;
 import com.svi.solitaire.simulation.SimulationStatistics;
 import com.svi.solitaire.strategy.RuleBasedPlayer;
-import com.svi.solitaire.models.tableau.Manoeuvre;
+import com.svi.solitaire.models.BoardMove;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -25,9 +25,9 @@ import java.util.function.IntFunction;
 
 /**
  * Sets up and starts the application: wires every collaborator ({@link #launch(String[])}), runs the
- * menus, and hands each game or simulation to the {@link GameController}, which plays it.
+ * menus, and hands each game or simulation to the {@link GameEngine}, which plays it.
  */
-public class GameRunner {
+public class GameLauncher {
 
     private static final String NO_COLOR_FLAG = "--no-color";
 
@@ -39,19 +39,19 @@ public class GameRunner {
     private static final int MODE_WATCH = 1;
     private static final int MODE_SIMULATE = 2;
 
-    private final GameController controller;
+    private final GameEngine engine;
     private final GameInitializer initializer;
     private final ShuffleFactory shuffles;
     private final ConsoleDisplay view;
     private final InputHandler input;
     private final FileLoader fileLoader;
-    private final SimulationRunning simulation;
+    private final SimulationRunner simulation;
 
-    public GameRunner(GameController controller,
-                      GameInitializer initializer, ShuffleFactory shuffles,
-                      ConsoleDisplay view, InputHandler input, FileLoader fileLoader,
-                      SimulationRunning simulation) {
-        this.controller = controller;
+    public GameLauncher(GameEngine engine,
+                        GameInitializer initializer, ShuffleFactory shuffles,
+                        ConsoleDisplay view, InputHandler input, FileLoader fileLoader,
+                        SimulationRunner simulation) {
+        this.engine = engine;
         this.initializer = initializer;
         this.shuffles = shuffles;
         this.view = view;
@@ -70,7 +70,7 @@ public class GameRunner {
         GameRules rules = new GameRules();
         MoveExecutor executor = new MoveExecutor();
         RuleBasedPlayer player = new RuleBasedPlayer(rules);
-        GameController controller = new GameController(player, executor, rules);
+        GameEngine engine = new GameEngine(player, executor, rules);
 
         PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         ConsoleDisplay view = new ConsoleDisplay(out, useColor, rules);
@@ -78,16 +78,16 @@ public class GameRunner {
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
         InputHandler input = new InputHandler(scanner, view);
 
-        FileLoader fileLoader = new FileLoader(view);
+        FileLoader fileLoader = new FileLoader();
         GameInitializer initializer = new GameInitializer();
         ShuffleFactory shuffles = new ShuffleFactory(new Random());
-        SimulationRunning simulation = new SimulationRunning(controller, initializer);
+        SimulationRunner simulation = new SimulationRunner(engine, initializer);
 
-        GameRunner runner = new GameRunner(controller, initializer, shuffles,
+        GameLauncher runner = new GameLauncher(engine, initializer, shuffles,
                 view, input, fileLoader, simulation);
         try {
             runner.run();
-        } catch (InputHandler.InputEndedException e) {
+        } catch (InputHandler.InputEndedException | InterruptedException e) {
             out.println();
         } finally {
             scanner.close();
@@ -96,7 +96,8 @@ public class GameRunner {
 
     // ------------------------------------------------------------------- menu
 
-    public void run() {
+    /** Runs the menus until the user quits or the input ends. */
+    public void run() throws InterruptedException {
         Deck deck = promptForDeck();                      // loaded once; every new game reuses it
         if (deck == null) {
             return;                                       // input ended
@@ -104,7 +105,7 @@ public class GameRunner {
         int again;
         do {
             view.displayMainMenu();
-            DrawMove drawMove = DrawMove.fromCount(input.askDrawCount());
+            DrawMode drawMode = DrawMode.fromCount(input.askDrawCount());
 
             view.showMenu("SELECT SHUFFLE", "[1] Random", "[2] Perfect In", "[3] Perfect Out",
                     "[4] No shuffle");
@@ -115,9 +116,9 @@ public class GameRunner {
                     "[2] Run a simulation (win-rate statistics)");
             int mode = input.askChoice("Enter your choice : ", MODE_WATCH, MODE_SIMULATE);
             if (mode == MODE_WATCH) {
-                watchOneGame(deck, drawMove, shuffle);
+                watchOneGame(deck, drawMode, shuffle);
             } else {
-                simulate(deck, drawMove, shuffle);
+                simulate(deck, drawMode, shuffle);
             }
 
             view.showMenu("PLAY AGAIN?", "[1] Yes, same deck", "[2] Yes, load another deck file", "[0] Quit");
@@ -132,23 +133,31 @@ public class GameRunner {
         view.showMessage("Thanks for playing!");
     }
 
-    /** Asks for the deck file first; repeats until it loads as a valid 52-card deck. Null if input ended. */
+    /**
+     * Asks for the deck file and repeats until it loads as a valid 52-card deck. The loader reports
+     * problems by throwing; this is the place that decides what to do about them (show the reason and ask again).
+     *
+     * @return the loaded deck, or null if the input ended
+     */
     private Deck promptForDeck() {
-        Deck deck;
-        do {
+        while (true) {
             String fileName = input.askDeckFile();
             if (fileName == null) {
                 return null;
             }
-            deck = fileLoader.loadDeck(fileName);
-        } while (deck.count() != Constants.TOTAL_CARDS.getValue());
-        view.showMessage("Deck loaded.");
-        return deck;
+            try {
+                Deck deck = fileLoader.loadDeck(fileName);
+                view.showMessage("Deck loaded.");
+                return deck;
+            } catch (DeckLoadException e) {
+                view.showError(e.getMessage() + " Please check the " + fileName + " file.");
+            }
+        }
     }
 
     // ------------------------------------------------------------ single game
 
-    private void watchOneGame(Deck deck, DrawMove drawMove, int shuffle) {
+    private void watchOneGame(Deck deck, DrawMode drawMode, int shuffle) throws InterruptedException {
         ShuffleStrategy shuffleStrategy;
         if (shuffle == SHUFFLE_RANDOM) {
             shuffleStrategy = shuffles.random();
@@ -158,11 +167,11 @@ public class GameRunner {
             int rounds = input.askNumber("Number of perfect shuffles : ", 1, 100);
             shuffleStrategy = shuffle == SHUFFLE_PERFECT_IN ? shuffles.perfectIn(rounds) : shuffles.perfectOut(rounds);
         }
-        view.showMessage("Shuffle: " + shuffleStrategy.getName() + "   |   Draw " + drawMove.getCount());
+        view.showMessage("Shuffle: " + shuffleStrategy.getName() + "   |   Draw " + drawMode.getCount());
 
         view.showMenu("DISPLAY", "[1] Show the board after every move", "[2] Move list and final board only");
         boolean showEveryBoard = input.askChoice("Enter your choice : ", 1, 2) == 1;
-        play(initializer.newGame(deck, shuffleStrategy, drawMove), showEveryBoard);
+        play(initializer.newGame(deck, shuffleStrategy, drawMode), showEveryBoard);
     }
 
     /**
@@ -171,13 +180,13 @@ public class GameRunner {
      * @param state          the dealt game (it is played out in place)
      * @param showEveryBoard true: print the board after every step; false: only the steps and the final board
      */
-    public GameStatus play(GameState state, boolean showEveryBoard) {
+    public void play(GameState state, boolean showEveryBoard) throws InterruptedException {
         view.showMessage("Initial deal:");
         view.showBoard(state);
 
-        GameController.Listener listener = new GameController.Listener() {
+        GameEngine.Listener listener = new GameEngine.Listener() {
             @Override
-            public void beforeMove(int number, Manoeuvre move, GameState current) {
+            public void beforeMove(int number, BoardMove move, GameState current) {
                 view.showStep(number, move, current);
             }
 
@@ -188,33 +197,33 @@ public class GameRunner {
                 }
             }
         };
-        GameController.Outcome outcome = controller.play(state, listener);
+        GameEngine.Outcome outcome = engine.play(state, listener);
 
         if (!showEveryBoard) {
             view.showMessage("");
             view.showBoard(state);
         }
         view.showResult(outcome.status(), outcome.moves(), state);
-        return outcome.status();
     }
 
     // ------------------------------------------------------------- simulation
 
-    private void simulate(Deck deck, DrawMove drawMove, int shuffle) {
+    private void simulate(Deck deck, DrawMode drawMode, int shuffle) {
         int games;
         IntFunction<ShuffleStrategy> shuffleFor;
         String shuffleName;
 
         if (shuffle == SHUFFLE_RANDOM) {
-            games = input.askNumber("Number of games : ", 1, Constants.MAX_SIMULATION_GAMES.getValue());
+            games = input.askNumber("Number of games : ", 1, PlayLimits.MAX_SIMULATION_GAMES);
             long baseSeed = System.nanoTime();
-            // one seeded Random per game: reproducible and safe to use from parallel workers
+            // one Random per game, so parallel workers never share a generator (the base seed comes
+            // from System.nanoTime(), so two runs give different games)
             shuffleFor = i -> shuffles.seeded(baseSeed + i);
             shuffleName = "Random";
         } else if (shuffle == SHUFFLE_NONE) {
             view.showMessage("An unshuffled deck always deals the same game, so one game is played.");
             games = 1;
-            shuffleFor = i -> shuffles.none();
+            shuffleFor = _ -> shuffles.none();
             shuffleName = shuffles.none().getName();
         } else {
             view.showMessage("Each game will use one more perfect shuffle than the previous game.");
@@ -224,13 +233,13 @@ public class GameRunner {
             shuffleName = (in ? "Perfect In" : "Perfect Out") + " (rounds 1.." + games + ")";
         }
 
-        view.showSimulationHeader(games, drawMove, shuffleName);
+        view.showSimulationHeader(games, drawMode, shuffleName);
         int step = Math.max(1, games / 10);
-        SimulationStatistics stats = simulation.run(deck, games, drawMove, shuffleFor, done -> {
+        SimulationStatistics stats = simulation.run(deck, games, drawMode, shuffleFor, done -> {
             if (done % step == 0 && done != games) {
                 view.showProgress(done, games);
             }
         });
-        view.showStatistics(stats, drawMove, shuffleName);
+        view.showStatistics(stats, drawMode, shuffleName);
     }
 }

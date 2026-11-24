@@ -1,6 +1,6 @@
-package com.svi.solitaire.models.tableau;
+package com.svi.solitaire.models.piles;
 
-import com.svi.solitaire.enums.Constants;
+import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.models.Card;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public abstract class Talon {
 
-    protected final List<Card> cards = new ArrayList<>(Constants.STOCK_SIZE.getValue());
+    protected final List<Card> cards = new ArrayList<>(GameConstants.STOCK_SIZE);
 
     public int size() {
         return cards.size();

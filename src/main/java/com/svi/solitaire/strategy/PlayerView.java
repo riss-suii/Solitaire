@@ -1,7 +1,7 @@
 package com.svi.solitaire.strategy;
 
-import com.svi.solitaire.enums.Constants;
-import com.svi.solitaire.enums.DrawMove;
+import com.svi.solitaire.constants.GameConstants;
+import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.GameState;
 
@@ -19,10 +19,10 @@ import java.util.List;
  */
 public final class PlayerView {
 
-    private static final int PILES = Constants.TABLEAU_COUNT.getValue();
-    private static final int SUITS = Constants.FOUNDATION_COUNT.getValue();
+    private static final int PILES = GameConstants.TABLEAU_PILE_COUNT;
+    private static final int SUITS = GameConstants.FOUNDATION_COUNT;
 
-    private final DrawMove drawMove;
+    private final DrawMode drawMode;
     private final int[] faceDown = new int[PILES];
     private final List<List<Card>> faceUp = new ArrayList<>();
     private final int[] foundation = new int[SUITS];
@@ -32,26 +32,26 @@ public final class PlayerView {
     private final List<Card> knownStock;
 
     private PlayerView(GameState state, boolean talonKnown) {
-        this.drawMove = state.getDrawMove();
+        this.drawMode = state.getDrawMode();
         for (int pile = 0; pile < PILES; pile++) {
-            faceDown[pile] = state.faceDownCount(pile);
+            faceDown[pile] = state.getFaceDownCount(pile);
             List<Card> visible = new ArrayList<>();
-            for (int i = faceDown[pile]; i < state.tableauSize(pile); i++) {
-                visible.add(state.tableauCard(pile, i));
+            for (int i = faceDown[pile]; i < state.getTableauSize(pile); i++) {
+                visible.add(state.getTableauCard(pile, i));
             }
             faceUp.add(visible);
         }
         for (int suit = 0; suit < SUITS; suit++) {
-            foundation[suit] = state.foundationHeight(suit);
+            foundation[suit] = state.getFoundationHeight(suit);
         }
-        for (int i = 0; i < state.wasteSize(); i++) {
-            waste.add(state.wasteCard(i));
+        for (int i = 0; i < state.getWasteSize(); i++) {
+            waste.add(state.getWasteCard(i));
         }
-        this.stockSize = state.stockSize();
+        this.stockSize = state.getStockSize();
         if (talonKnown) {
             this.knownStock = new ArrayList<>(stockSize);
             for (int i = 0; i < stockSize; i++) {
-                knownStock.add(state.talonCard(state.wasteSize() + i));
+                knownStock.add(state.getTalonCard(state.getWasteSize() + i));
             }
         } else {
             this.knownStock = null;
@@ -63,8 +63,8 @@ public final class PlayerView {
         return new PlayerView(state, talonKnown);
     }
 
-    public DrawMove getDrawMove() {
-        return drawMove;
+    public DrawMode getDrawMode() {
+        return drawMode;
     }
 
     public int faceDownCount(int pile) {

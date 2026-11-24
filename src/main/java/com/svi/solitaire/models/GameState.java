@@ -1,11 +1,12 @@
 package com.svi.solitaire.models;
 
-import com.svi.solitaire.enums.Constants;
-import com.svi.solitaire.enums.DrawMove;
+import com.svi.solitaire.constants.GameConstants;
+import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.enums.Suit;
-import com.svi.solitaire.models.tableau.Foundation;
-import com.svi.solitaire.models.tableau.Stock;
-import com.svi.solitaire.models.tableau.Waste;
+import com.svi.solitaire.models.piles.Foundation;
+import com.svi.solitaire.models.piles.Stock;
+import com.svi.solitaire.models.piles.TableauPile;
+import com.svi.solitaire.models.piles.Waste;
 
 import java.util.List;
 
@@ -22,22 +23,20 @@ import java.util.List;
  */
 public class GameState {
 
-    private static final int PILES = Constants.TABLEAU_COUNT.getValue();
-    private static final int MAX_PILE = Constants.MAX_TABLEAU_PILE_SIZE.getValue();
+    private static final int PILES = GameConstants.TABLEAU_PILE_COUNT;
 
-    private final DrawMove drawMove;
-    private final Card[][] tableau;
-    private final int[] tableauSize;
-    private final int[] faceUp;
+    private final DrawMode drawMode;
+    private final TableauPile[] tableau;
     private final Foundation foundation;
     private final Stock stock;
     private final Waste waste;
 
-    public GameState(DrawMove drawMove) {
-        this.drawMove = drawMove;
-        this.tableau = new Card[PILES][MAX_PILE];
-        this.tableauSize = new int[PILES];
-        this.faceUp = new int[PILES];
+    public GameState(DrawMode drawMode) {
+        this.drawMode = drawMode;
+        this.tableau = new TableauPile[PILES];
+        for (int pile = 0; pile < PILES; pile++) {
+            tableau[pile] = new TableauPile();
+        }
         this.foundation = new Foundation();
         this.stock = new Stock();
         this.waste = new Waste();
@@ -45,90 +44,102 @@ public class GameState {
 
     // ------------------------------------------------------------------ queries
 
-    public DrawMove getDrawMove() {
-        return drawMove;
+    /**
+     * @return how many cards a draw turns over
+     */
+    public DrawMode getDrawMode() {
+        return drawMode;
     }
 
-    public int tableauSize(int pile) {
-        return tableauSize[pile];
+    public int getTableauSize(int pile) {
+        return tableau[pile].size();
     }
 
-    public int faceUpCount(int pile) {
-        return faceUp[pile];
+    public int getFaceUpCount(int pile) {
+        return tableau[pile].getFaceUpCount();
     }
 
-    public int faceDownCount(int pile) {
-        return tableauSize[pile] - faceUp[pile];
+    public int getFaceDownCount(int pile) {
+        return tableau[pile].getFaceDownCount();
     }
 
-    public Card tableauCard(int pile, int index) {
-        return tableau[pile][index];
+    public Card getTableauCard(int pile, int index) {
+        return tableau[pile].get(index);
     }
 
     /** Top (last) card of a pile, or null when empty. */
-    public Card topTableauCard(int pile) {
-        int size = tableauSize[pile];
-        return size == 0 ? null : tableau[pile][size - 1];
+    public Card getTopTableauCard(int pile) {
+        return tableau[pile].getTop();
     }
 
-    public int foundationHeight(int suitIndex) {
+    /**
+     * @param suitIndex the suit's ordinal
+     * @return how many cards are on that suit's foundation
+     */
+    public int getFoundationHeight(int suitIndex) {
         return foundation.height(suitIndex);
     }
 
-    public int foundationHeight(Suit suit) {
+    public int getFoundationHeight(Suit suit) {
         return foundation.height(suit);
     }
 
-    public Card topFoundationCard(Suit suit) {
+    public Card getTopFoundationCard(Suit suit) {
         return foundation.top(suit);
     }
 
-    public int totalFoundationCards() {
+    public int getTotalFoundationCards() {
         return foundation.total();
     }
 
-    public int stockSize() {
+    public int getStockSize() {
         return stock.size();
     }
 
-    public int wasteSize() {
+    public int getWasteSize() {
         return waste.size();
     }
 
-    public Card wasteTop() {
+    public Card getWasteTop() {
         return waste.top();
     }
 
-    public Card wasteCard(int index) {
+    public Card getWasteCard(int index) {
         return waste.get(index);
     }
 
     /** Stock and waste together: waste cards first, then the stock in draw order. */
-    public int talonSize() {
+    public int getTalonSize() {
         return waste.size() + stock.size();
     }
 
     /** Number of talon cards already in the waste. */
-    public int pointer() {
+    public int getPointer() {
         return waste.size();
     }
 
-    public Card talonCard(int index) {
+    public Card getTalonCard(int index) {
         return index < waste.size() ? waste.get(index) : stock.get(index - waste.size());
     }
 
     // ---------------------------------------------------------------- mutators
 
+    /**
+     * Puts a card on top of a tableau pile during the initial deal.
+     *
+     * @param isFaceUp true if the card is dealt face up
+     */
     public void dealToTableau(int pile, Card card, boolean isFaceUp) {
-        tableau[pile][tableauSize[pile]++] = card;
-        if (isFaceUp) {
-            faceUp[pile]++;
-        }
+        tableau[pile].deal(card, isFaceUp);
     }
 
-    /** Fills the stock in draw order (first element is drawn first) and empties the waste. */
+    /**
+     * Fills the stock in draw order (first element is drawn first) and empties the waste.
+     *
+     * @throws IllegalArgumentException if there are more cards than the stock can hold
+     */
     public void setStock(List<Card> cards) {
-        if (cards.size() > Constants.STOCK_SIZE.getValue()) {
+        if (cards.size() > GameConstants.STOCK_SIZE) {
             throw new IllegalArgumentException("Too many stock cards: " + cards.size());
         }
         stock.load(cards);
@@ -136,34 +147,26 @@ public class GameState {
     }
 
     public Card removeTableauTop(int pile) {
-        int index = --tableauSize[pile];
-        Card card = tableau[pile][index];
-        tableau[pile][index] = null;
-        if (faceUp[pile] > 0) {
-            faceUp[pile]--;
-        }
-        return card;
+        return tableau[pile].removeTop();
     }
 
+    /** Puts a card face up on top of a tableau pile (used by moves, not by the initial deal). */
     public void addTableauTop(int pile, Card card) {
-        tableau[pile][tableauSize[pile]++] = card;
-        faceUp[pile]++;
+        tableau[pile].addFaceUp(card);
     }
 
     /** Turns the top card over when a pile has cards but none face up. */
     public void revealTopIfHidden(int pile) {
-        if (tableauSize[pile] > 0 && faceUp[pile] == 0) {
-            faceUp[pile] = 1;
-        }
+        tableau[pile].revealTopIfHidden();
     }
 
     public Card removeWasteTop() {
         return waste.removeTop();
     }
 
-    /** Turns {@code drawMove.getCount()} cards (or what is left) from the stock onto the waste. */
+    /** Turns {@code drawMode.getCount()} cards (or what is left) from the stock onto the waste. */
     public void draw() {
-        int count = Math.min(getDrawMove().getCount(), stock.size());
+        int count = Math.min(getDrawMode().getCount(), stock.size());
         for (int i = 0; i < count; i++) {
             waste.add(stock.draw());
         }
@@ -191,20 +194,21 @@ public class GameState {
     public long exactFingerprint() {
         long h = 0x243F6A8885A308D3L;
         for (int p = 0; p < PILES; p++) {
-            h = mix(h, 1000 + faceUp[p]);
-            for (int i = 0; i < tableauSize[p]; i++) {
-                h = mix(h, tableau[p][i].id() + 1);
+            TableauPile pile = tableau[p];
+            h = mix(h, 1000 + pile.getFaceUpCount());
+            for (int i = 0; i < pile.size(); i++) {
+                h = mix(h, pile.get(i).id() + 1);
             }
             h = mix(h, 2000);
         }
-        for (int suit = 0; suit < Constants.FOUNDATION_COUNT.getValue(); suit++) {
+        for (int suit = 0; suit < GameConstants.FOUNDATION_COUNT; suit++) {
             h = mix(h, 3000 + foundation.height(suit));
         }
-        int talon = talonSize();
+        int talon = getTalonSize();
         for (int i = 0; i < talon; i++) {
-            h = mix(h, talonCard(i).id() + 1);
+            h = mix(h, getTalonCard(i).id() + 1);
         }
-        return mix(h, 4000 + pointer());
+        return mix(h, 4000 + getPointer());
     }
 
     private static long mix(long h, long v) {

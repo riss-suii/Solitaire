@@ -1,6 +1,6 @@
 package com.svi.solitaire.models;
 
-import com.svi.solitaire.enums.Constants;
+import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
 
@@ -27,7 +27,7 @@ public class Card {
 
     /** Unique id 0..51 (used for hashing positions). */
     public int id() {
-        return suit.ordinal() * Constants.CARDS_PER_SUIT.getValue() + rank.ordinal();
+        return suit.ordinal() * GameConstants.CARDS_PER_SUIT + rank.ordinal();
     }
 
     /** Identity is rank + suit. Whether a card is face up is tracked by its tableau pile in GameState. */

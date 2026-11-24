@@ -1,16 +1,16 @@
 package com.svi.solitaire.rules;
 
-import com.svi.solitaire.enums.Constants;
+import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.GameState;
-import com.svi.solitaire.models.tableau.Manoeuvre;
+import com.svi.solitaire.models.BoardMove;
 
 /** Klondike rules: what may be stacked where, which moves are legal, and when the game is won. */
 public class GameRules {
 
-    private static final int PILES = Constants.TABLEAU_COUNT.getValue();
+    private static final int PILES = GameConstants.TABLEAU_PILE_COUNT;
 
     /** A card goes on a tableau pile if colors alternate and rank is one lower; only Kings go on an empty pile. */
     public boolean canPlaceOnTableau(Card moving, Card target) {
@@ -28,66 +28,67 @@ public class GameRules {
 
     /** A draw turns over the draw-mode count (1 or 3) of cards, or whatever is left in the stock. */
     public int cardsToDraw(GameState state) {
-        return Math.min(state.getDrawMove().getCount(), state.stockSize());
+        return Math.min(state.getDrawMode().getCount(), state.getStockSize());
     }
 
     /** The card a move picks up (the bottom card of the run for multi-card moves); null for stock moves. */
-    public static Card movingCard(GameState state, Manoeuvre move) {
+    public static Card movingCard(GameState state, BoardMove move) {
         return switch (move.type()) {
-            case WASTE_TO_TABLEAU, WASTE_TO_FOUNDATION -> state.wasteTop();
+            case WASTE_TO_TABLEAU, WASTE_TO_FOUNDATION -> state.getWasteTop();
             case TABLEAU_TO_TABLEAU ->
-                    state.tableauCard(move.from(), state.tableauSize(move.from()) - move.count());
-            case TABLEAU_TO_FOUNDATION -> state.topTableauCard(move.from());
-            case FOUNDATION_TO_TABLEAU -> state.topFoundationCard(Suit.values()[move.from()]);
+                    state.getTableauCard(move.from(), state.getTableauSize(move.from()) - move.count());
+            case TABLEAU_TO_FOUNDATION -> state.getTopTableauCard(move.from());
+            case FOUNDATION_TO_TABLEAU -> state.getTopFoundationCard(Suit.values()[move.from()]);
             case DRAW, RECYCLE -> null;
         };
     }
 
+    /** The game is won when all 52 cards are on the foundations. */
     public boolean isWon(GameState state) {
-        return state.totalFoundationCards() == Constants.TOTAL_CARDS.getValue();
+        return state.getTotalFoundationCards() == GameConstants.TOTAL_CARDS;
     }
 
     /** Decides whether a single move is legal in the given position. */
-    public boolean isValid(GameState state, Manoeuvre move) {
+    public boolean isValid(GameState state, BoardMove move) {
         return switch (move.type()) {
-            case DRAW -> state.stockSize() > 0;
-            case RECYCLE -> state.stockSize() == 0 && state.wasteSize() > 0;
+            case DRAW -> state.getStockSize() > 0;
+            case RECYCLE -> state.getStockSize() == 0 && state.getWasteSize() > 0;
             case WASTE_TO_FOUNDATION -> {
                 Card card = movingCard(state, move);
                 yield card != null
                         && move.to() == card.getSuit().ordinal()
-                        && canPlaceOnFoundation(card, state.foundationHeight(card.getSuit()));
+                        && canPlaceOnFoundation(card, state.getFoundationHeight(card.getSuit()));
             }
             case WASTE_TO_TABLEAU -> {
                 Card card = movingCard(state, move);
-                yield card != null && isPile(move.to()) && canPlaceOnTableau(card, state.topTableauCard(move.to()));
+                yield card != null && isPile(move.to()) && canPlaceOnTableau(card, state.getTopTableauCard(move.to()));
             }
             case TABLEAU_TO_FOUNDATION -> {
                 if (!isPile(move.from())) {
                     yield false;
                 }
-                Card card = state.topTableauCard(move.from());
+                Card card = state.getTopTableauCard(move.from());
                 yield card != null
                         && move.to() == card.getSuit().ordinal()
-                        && canPlaceOnFoundation(card, state.foundationHeight(card.getSuit()));
+                        && canPlaceOnFoundation(card, state.getFoundationHeight(card.getSuit()));
             }
             case TABLEAU_TO_TABLEAU -> {
                 if (!isPile(move.from()) || !isPile(move.to()) || move.from() == move.to()) {
                     yield false;
                 }
                 int count = move.count();
-                if (count < 1 || count > state.faceUpCount(move.from())) {
+                if (count < 1 || count > state.getFaceUpCount(move.from())) {
                     yield false;
                 }
-                Card bottom = state.tableauCard(move.from(), state.tableauSize(move.from()) - count);
-                yield canPlaceOnTableau(bottom, state.topTableauCard(move.to()));
+                Card bottom = state.getTableauCard(move.from(), state.getTableauSize(move.from()) - count);
+                yield canPlaceOnTableau(bottom, state.getTopTableauCard(move.to()));
             }
             case FOUNDATION_TO_TABLEAU -> {
-                if (move.from() < 0 || move.from() >= Constants.FOUNDATION_COUNT.getValue() || !isPile(move.to())) {
+                if (move.from() < 0 || move.from() >= GameConstants.FOUNDATION_COUNT || !isPile(move.to())) {
                     yield false;
                 }
-                Card card = state.topFoundationCard(Suit.values()[move.from()]);
-                yield card != null && canPlaceOnTableau(card, state.topTableauCard(move.to()));
+                Card card = state.getTopFoundationCard(Suit.values()[move.from()]);
+                yield card != null && canPlaceOnTableau(card, state.getTopTableauCard(move.to()));
             }
         };
     }

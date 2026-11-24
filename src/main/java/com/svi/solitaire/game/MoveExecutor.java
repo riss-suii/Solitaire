@@ -3,13 +3,13 @@ package com.svi.solitaire.game;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.GameState;
-import com.svi.solitaire.models.tableau.Manoeuvre;
+import com.svi.solitaire.models.BoardMove;
 
 /** Applies moves to a {@link GameState}. Assumes the move was validated already. */
 public class MoveExecutor {
 
     /** Applies the move in place. */
-    public void execute(GameState state, Manoeuvre move) {
+    public void execute(GameState state, BoardMove move) {
         switch (move.type()) {
             case DRAW -> state.draw();
             case RECYCLE -> state.recycle();
@@ -23,14 +23,14 @@ public class MoveExecutor {
             case TABLEAU_TO_TABLEAU -> moveRun(state, move);
             case FOUNDATION_TO_TABLEAU -> {
                 Suit suit = Suit.values()[move.from()];
-                Card card = state.topFoundationCard(suit);
+                Card card = state.getTopFoundationCard(suit);
                 state.removeFromFoundation(suit);
                 state.addTableauTop(move.to(), card);
             }
         }
     }
 
-    private void moveRun(GameState state, Manoeuvre move) {
+    private void moveRun(GameState state, BoardMove move) {
         Card[] run = new Card[move.count()];
         for (int i = run.length - 1; i >= 0; i--) {
             run[i] = state.removeTableauTop(move.from());

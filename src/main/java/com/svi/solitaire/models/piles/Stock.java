@@ -1,4 +1,4 @@
-package com.svi.solitaire.models.tableau;
+package com.svi.solitaire.models.piles;
 
 import com.svi.solitaire.models.Card;
 

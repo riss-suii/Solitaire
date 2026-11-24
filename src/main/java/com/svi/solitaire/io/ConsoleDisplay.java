@@ -1,15 +1,15 @@
 package com.svi.solitaire.io;
 
+import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.Colors;
-import com.svi.solitaire.enums.Constants;
-import com.svi.solitaire.enums.DrawMove;
+import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.rules.GameRules;
 import com.svi.solitaire.simulation.SimulationStatistics;
-import com.svi.solitaire.models.tableau.Manoeuvre;
+import com.svi.solitaire.models.BoardMove;
 
 import java.io.PrintStream;
 
@@ -24,8 +24,9 @@ public class ConsoleDisplay {
     private static final int STOCK_COLUMN_WIDTH = 14;
     private static final int WASTE_COLUMN_WIDTH = 21;
     private static final Suit[] FOUNDATION_ORDER = {Suit.SPADES, Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS};
-    private static final int PILES = Constants.TABLEAU_COUNT.getValue();
-    private static final int WIDTH = Constants.BANNER_WIDTH.getValue();
+    private static final int PILES = GameConstants.TABLEAU_PILE_COUNT;
+
+    private static final int WIDTH = 78;
 
     private final PrintStream out;
     private final boolean useColor;
@@ -45,11 +46,12 @@ public class ConsoleDisplay {
         out.println(style(Colors.BOLD, "                               SELECT DRAW MODE \n"));
         out.println(style(Colors.BOLD, "                               [1] Draw 1 Card"));
         out.println(style(Colors.BOLD, "                               [3] Draw 3 Cards"));
-        out.println(style(Colors.CYAN, "=============================================================================="));
+        out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
     }
 
     /** Prints a centred menu block: title, options, closing rule. */
     public void showMenu(String title, String... options) {
+        out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
         out.println(style(Colors.BOLD, center(title)));
         for (String option : options) {
             out.println(style(Colors.BOLD, center(option)));
@@ -60,7 +62,7 @@ public class ConsoleDisplay {
     // ------------------------------------------------------------------ board
 
     /** Header line for one step of the replay, e.g. {@code --- Step 14: Draw 3 cards from the stock ---}. */
-    public void showStep(int number, Manoeuvre move, GameState before) {
+    public void showStep(int number, BoardMove move, GameState before) {
         out.println();
         out.println("--- Step " + number + ": " + describe(move, before) + " ---");
     }
@@ -78,7 +80,7 @@ public class ConsoleDisplay {
 
         int rows = 1;
         for (int pile = 0; pile < PILES; pile++) {
-            rows = Math.max(rows, state.tableauSize(pile));
+            rows = Math.max(rows, state.getTableauSize(pile));
         }
         for (int row = 0; row < rows; row++) {
             StringBuilder line = new StringBuilder();
@@ -94,23 +96,23 @@ public class ConsoleDisplay {
     }
 
     private String stockText(GameState state) {
-        if (state.stockSize() == 0) {
+        if (state.getStockSize() == 0) {
             return pad(EMPTY_SLOT, STOCK_COLUMN_WIDTH);
         }
-        String count = " x" + state.stockSize();
+        String count = " x" + state.getStockSize();
         return style(Colors.GRAY, FACE_DOWN) + pad(count, STOCK_COLUMN_WIDTH - CELL_WIDTH);
     }
 
     /** The last cards of the waste (1 or 3 depending on draw mode); the playable top card is blue. */
     private String wasteText(GameState state) {
-        int waste = state.wasteSize();
+        int waste = state.getWasteSize();
         if (waste == 0) {
             return pad(EMPTY_SLOT, WASTE_COLUMN_WIDTH);
         }
-        int shown = Math.min(state.getDrawMove().getCount(), waste);
+        int shown = Math.min(state.getDrawMode().getCount(), waste);
         StringBuilder text = new StringBuilder();
         for (int i = waste - shown; i < waste; i++) {
-            Card card = state.wasteCard(i);
+            Card card = state.getWasteCard(i);
             text.append(style(i == waste - 1 ? Colors.CYAN : colorOf(card), cardCell(card)));
         }
         return text + " ".repeat(Math.max(0, WASTE_COLUMN_WIDTH - shown * CELL_WIDTH));
@@ -119,7 +121,7 @@ public class ConsoleDisplay {
     private String foundationsText(GameState state) {
         StringBuilder text = new StringBuilder();
         for (Suit suit : FOUNDATION_ORDER) {
-            Card top = state.topFoundationCard(suit);
+            Card top = state.getTopFoundationCard(suit);
             if (top == null) {
                 text.append(style(suit.isRed() ? Colors.RED : Colors.RESET, "[  " + suit.getSymbol() + " ]"));
             } else {
@@ -130,14 +132,14 @@ public class ConsoleDisplay {
     }
 
     private String tableauCell(GameState state, int pile, int row) {
-        int size = state.tableauSize(pile);
+        int size = state.getTableauSize(pile);
         if (row >= size) {
             return row == 0 ? style(Colors.GRAY, EMPTY_SLOT) : " ".repeat(CELL_WIDTH);
         }
-        if (row < size - state.faceUpCount(pile)) {
+        if (row < size - state.getFaceUpCount(pile)) {
             return style(Colors.GRAY, FACE_DOWN);
         }
-        Card card = state.tableauCard(pile, row);
+        Card card = state.getTableauCard(pile, row);
         return style(colorOf(card), cardCell(card));
     }
 
@@ -148,7 +150,7 @@ public class ConsoleDisplay {
 
     // ------------------------------------------------------------------ moves
 
-    public String describe(Manoeuvre move, GameState state) {
+    public String describe(BoardMove move, GameState state) {
         Card card = GameRules.movingCard(state, move);
         return switch (move.type()) {
             case DRAW -> {
@@ -175,11 +177,11 @@ public class ConsoleDisplay {
             out.println(style(Colors.YELLOW, center("No winning line was found for this deal.")));
         }
         out.println(center("Moves: " + moves + "    Cards on foundations: "
-                + finalState.totalFoundationCards() + "/" + Constants.TOTAL_CARDS.getValue()));
+                + finalState.getTotalFoundationCards() + "/" + GameConstants.TOTAL_CARDS));
         out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
     }
 
-    public void showSimulationHeader(int games, DrawMove drawMove, String shuffleName) {
+    public void showSimulationHeader(int games, DrawMode drawMove, String shuffleName) {
         out.println();
         out.println("  Simulating " + games + " game" + (games == 1 ? "" : "s")
                 + "  |  Draw " + drawMove.getCount() + "  |  " + shuffleName);
@@ -189,7 +191,7 @@ public class ConsoleDisplay {
         out.printf("  ... %d / %d games%n", done, total);
     }
 
-    public void showStatistics(SimulationStatistics stats, DrawMove drawMove, String shuffleName) {
+    public void showStatistics(SimulationStatistics stats, DrawMode drawMove, String shuffleName) {
         out.println();
         out.println(style(Colors.CYAN, titleLine("SIMULATION RESULTS")));
         out.printf("  Draw mode          : Draw %d%n", drawMove.getCount());

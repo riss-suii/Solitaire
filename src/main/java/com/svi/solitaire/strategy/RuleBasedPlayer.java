@@ -1,11 +1,11 @@
 package com.svi.solitaire.strategy;
 
-import com.svi.solitaire.enums.Constants;
+import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.rules.GameRules;
-import com.svi.solitaire.models.tableau.Manoeuvre;
+import com.svi.solitaire.models.BoardMove;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +40,7 @@ import java.util.Optional;
  */
 public class RuleBasedPlayer {
 
-    private static final int PILES = Constants.TABLEAU_COUNT.getValue();
+    private static final int PILES = GameConstants.TABLEAU_PILE_COUNT;
 
     // priorities, highest first
     private static final int FREE_TO_FOUNDATION = 10000;
@@ -66,7 +66,7 @@ public class RuleBasedPlayer {
      * @param stuck true when this position has already come up before, so the usual moves are exhausted
      * @return the next move, or empty when none is possible
      */
-    public Optional<Manoeuvre> nextMove(PlayerView view, boolean stuck) {
+    public Optional<BoardMove> nextMove(PlayerView view, boolean stuck) {
         // Rule 4: once every talon card has been flipped the player remembers them all, so it can tell
         // that going through the stock again is pointless instead of cycling until a position repeats.
         boolean talonUseless = isTalonKnown(view) && !hasPlayableTalonCard(view);
@@ -95,7 +95,7 @@ public class RuleBasedPlayer {
             Card card = waste.getLast();
             if (fitsFoundation(view, card)) {
                 int score = isFree(view, card) ? FREE_TO_FOUNDATION : stuck ? STUCK_TO_FOUNDATION - 100 : 0;
-                best.offer(Manoeuvre.wasteToFoundation(card.getSuit().ordinal()), score);
+                best.offer(BoardMove.wasteToFoundation(card.getSuit().ordinal()), score);
             }
         }
         for (int pile = 0; pile < PILES; pile++) {
@@ -104,7 +104,7 @@ public class RuleBasedPlayer {
                 continue;
             }
             int score = isFree(view, card) ? FREE_TO_FOUNDATION : stuck ? STUCK_TO_FOUNDATION : 0;
-            best.offer(Manoeuvre.tableauToFoundation(pile, card.getSuit().ordinal()), score + pile);
+            best.offer(BoardMove.tableauToFoundation(pile, card.getSuit().ordinal()), score + pile);
         }
     }
 
@@ -114,9 +114,9 @@ public class RuleBasedPlayer {
         if (rank <= 2) {
             return true;
         }
-        for (int suit = 0; suit < Constants.FOUNDATION_COUNT.getValue(); suit++) {
-            boolean oppositeColour = isRedSuit(suit) != card.isRed();
-            if (oppositeColour && view.foundationHeight(suit) < rank - 1) {
+        for (int suit = 0; suit < GameConstants.FOUNDATION_COUNT; suit++) {
+            boolean oppositeColor = isRedSuit(suit) != card.isRed();
+            if (oppositeColor && view.foundationHeight(suit) < rank - 1) {
                 return false;
             }
         }
@@ -154,10 +154,10 @@ public class RuleBasedPlayer {
             boolean toEmpty = target == null;
             if (hidden > 0) {
                 int score = toEmpty ? KING_STACK_TO_EMPTY + run.size() : FLIP + from * 100 - view.faceDownCount(to) * 5;
-                best.offer(Manoeuvre.tableauToTableau(from, to, run.size()), score);
+                best.offer(BoardMove.tableauToTableau(from, to, run.size()), score);
             } else if (!toEmpty) {
                 int score = kingReady ? EMPTY_A_COLUMN + from : stuck ? STUCK_EMPTY_A_COLUMN + from : 0;
-                best.offer(Manoeuvre.tableauToTableau(from, to, run.size()), score);
+                best.offer(BoardMove.tableauToTableau(from, to, run.size()), score);
             }
         }
 
@@ -171,7 +171,7 @@ public class RuleBasedPlayer {
                 Card moving = run.get(run.size() - count);
                 for (int to = 0; to < PILES; to++) {
                     if (to != from && top(view, to) != null && rules.canPlaceOnTableau(moving, top(view, to))) {
-                        best.offer(Manoeuvre.tableauToTableau(from, to, count), STUCK_UNCOVER + from);
+                        best.offer(BoardMove.tableauToTableau(from, to, count), STUCK_UNCOVER + from);
                     }
                 }
             }
@@ -196,7 +196,7 @@ public class RuleBasedPlayer {
                 continue;
             }
             int score = toEmpty ? WASTE_KING_TO_EMPTY : WASTE_TO_TABLEAU - view.faceDownCount(to);
-            best.offer(Manoeuvre.wasteToTableau(to), score);
+            best.offer(BoardMove.wasteToTableau(to), score);
         }
     }
 
@@ -205,9 +205,9 @@ public class RuleBasedPlayer {
     /** Rule 5: the stock is the last resort. */
     private void offerStockMove(PlayerView view, Best best) {
         if (view.stockSize() > 0) {
-            best.offer(Manoeuvre.draw(), DRAW);
+            best.offer(BoardMove.draw(), DRAW);
         } else if (!view.waste().isEmpty()) {
-            best.offer(Manoeuvre.recycle(), RECYCLE);
+            best.offer(BoardMove.recycle(), RECYCLE);
         }
     }
 
@@ -289,10 +289,10 @@ public class RuleBasedPlayer {
 
     /** Keeps the highest-scoring legal move; a score of 0 or fewer means "not wanted". */
     private static final class Best {
-        private Manoeuvre move;
+        private BoardMove move;
         private int score;
 
-        void offer(Manoeuvre candidate, int candidateScore) {
+        void offer(BoardMove candidate, int candidateScore) {
             if (candidateScore > score) {
                 move = candidate;
                 score = candidateScore;
