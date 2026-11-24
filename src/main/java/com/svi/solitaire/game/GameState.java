@@ -5,19 +5,18 @@ import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.piles.Foundation;
-import com.svi.solitaire.models.piles.Stock;
 import com.svi.solitaire.models.piles.TableauPile;
-import com.svi.solitaire.models.piles.Waste;
+import com.svi.solitaire.models.piles.Talon;
 
 import java.util.List;
 
 /**
- * Complete, compact game position: seven tableau piles, the foundations, the stock and the waste.
+ * Complete, compact game position: seven tableau piles, the foundations and the talon.
  *
  * <p>Tableau piles are fixed arrays; {@code faceUp[pile]} says how many cards at the end of a pile
- * are face up. The stock and waste together are treated as one "talon": cards {@code [0, pointer)}
- * are the waste (last one on top) and cards {@code [pointer, size)} are the stock, so turning the
- * waste back over keeps the original order.
+ * are face up. The stock and waste together are held by a single {@link Talon}: cards
+ * {@code [0, pointer)} are the waste (last one on top) and cards {@code [pointer, size)} are the
+ * stock, so turning the waste back over keeps the original order.
  *
  * <p>This class only stores state and exposes low-level mutators. Game logic lives in
  * {@code MoveExecutor}; legality lives in {@code GameRules}.
@@ -29,8 +28,7 @@ public class GameState {
     private final DrawMode drawMode;
     private final TableauPile[] tableau;
     private final Foundation foundation;
-    private final Stock stock;
-    private final Waste waste;
+    private final Talon talon;
 
     public GameState(DrawMode drawMode) {
         this.drawMode = drawMode;
@@ -39,8 +37,7 @@ public class GameState {
             tableau[pile] = new TableauPile();
         }
         this.foundation = new Foundation();
-        this.stock = new Stock();
-        this.waste = new Waste();
+        this.talon = new Talon();
     }
 
     // ------------------------------------------------------------------ queries
@@ -65,7 +62,7 @@ public class GameState {
     }
 
     public Card getTableauCard(int pile, int index) {
-        return tableau[pile].get(index);
+        return tableau[pile].getPosition(index);
     }
 
     /** Top (last) card of a pile, or null when empty. */
@@ -93,34 +90,54 @@ public class GameState {
         return foundation.total();
     }
 
+    /**
+     * @return how many cards are still in the stock
+     */
     public int getStockSize() {
-        return stock.size();
+        return talon.stockSize();
     }
 
+    /**
+     * @return how many cards are in the waste
+     */
     public int getWasteSize() {
-        return waste.size();
+        return talon.wasteSize();
     }
 
+    /** Top (playable) card of the waste, or null when the waste is empty. */
     public Card getWasteTop() {
-        return waste.top();
+        return talon.wasteTop();
     }
 
+    /**
+     * @param index the position in the waste, from 0 (oldest) to {@code getWasteSize() - 1} (top)
+     * @return the waste card at that position
+     * @throws IndexOutOfBoundsException if the index is not inside the waste
+     */
     public Card getWasteCard(int index) {
-        return waste.get(index);
+        if (index < 0 || index >= talon.wasteSize()) {
+            throw new IndexOutOfBoundsException("Waste index out of range: " + index);
+        }
+        return talon.getPosition(index);
     }
 
     /** Stock and waste together: waste cards first, then the stock in draw order. */
     public int getTalonSize() {
-        return waste.size() + stock.size();
+        return talon.size();
     }
 
     /** Number of talon cards already in the waste. */
     public int getPointer() {
-        return waste.size();
+        return talon.wasteSize();
     }
 
+    /**
+     * @param index the position in the combined talon (waste cards first, then the stock)
+     * @return the talon card at that position
+     * @throws IndexOutOfBoundsException if the index is outside the talon
+     */
     public Card getTalonCard(int index) {
-        return index < waste.size() ? waste.get(index) : stock.get(index - waste.size());
+        return talon.getPosition(index);
     }
 
     // ---------------------------------------------------------------- mutators
@@ -143,8 +160,7 @@ public class GameState {
         if (cards.size() > GameConstants.STOCK_SIZE) {
             throw new IllegalArgumentException("Too many stock cards: " + cards.size());
         }
-        stock.load(cards);
-        waste.clear();
+        talon.load(cards);
     }
 
     public Card removeTableauTop(int pile) {
@@ -161,21 +177,25 @@ public class GameState {
         tableau[pile].revealTopIfHidden();
     }
 
+    /**
+     * Removes the top card of the waste, for example when it is played onto the tableau or a
+     * foundation.
+     *
+     * @return the card that was on top of the waste
+     * @throws IllegalStateException if the waste is empty
+     */
     public Card removeWasteTop() {
-        return waste.removeTop();
+        return talon.removeWasteTop();
     }
 
     /** Turns {@code drawMode.getCount()} cards (or what is left) from the stock onto the waste. */
     public void draw() {
-        int count = Math.min(getDrawMode().getCount(), stock.size());
-        for (int i = 0; i < count; i++) {
-            waste.add(stock.draw());
-        }
+        talon.draw(getDrawMode().getCount());
     }
 
     /** Flips the waste back over to become the stock (order is preserved). */
     public void recycle() {
-        stock.refillFrom(waste);
+        talon.recycle();
     }
 
     public void addToFoundation(Suit suit) {
@@ -198,7 +218,7 @@ public class GameState {
             TableauPile pile = tableau[p];
             h = mix(h, 1000 + pile.getFaceUpCount());
             for (int i = 0; i < pile.size(); i++) {
-                h = mix(h, pile.get(i).id() + 1);
+                h = mix(h, pile.getPosition(i).id() + 1);
             }
             h = mix(h, 2000);
         }

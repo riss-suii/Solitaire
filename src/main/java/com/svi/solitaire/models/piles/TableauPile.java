@@ -40,7 +40,10 @@ public class TableauPile {
      * @param index position from the bottom of the pile (0 = bottom)
      * @return the card at that position
      */
-    public Card get(int index) {
+    public Card getPosition(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Pile index out of range: " + index);
+        }
         return cards[index];
     }
 
@@ -55,6 +58,7 @@ public class TableauPile {
      * @param isFaceUp true if the card is dealt face up
      */
     public void deal(Card card, boolean isFaceUp) {
+        ensureNotFull();
         cards[size++] = card;
         if (isFaceUp) {
             faceUpCount++;
@@ -63,6 +67,7 @@ public class TableauPile {
 
     /** Puts a card face up on top of the pile (used by moves, not by the initial deal). */
     public void addFaceUp(Card card) {
+        ensureNotFull();
         cards[size++] = card;
         faceUpCount++;
     }
@@ -73,6 +78,9 @@ public class TableauPile {
      * @throws ArrayIndexOutOfBoundsException if the pile is empty
      */
     public Card removeTop() {
+        if (size == 0) {
+            throw new IllegalStateException("The pile is empty.");
+        }
         Card card = cards[--size];
         cards[size] = null;
         if (faceUpCount > 0) {
@@ -81,10 +89,17 @@ public class TableauPile {
         return card;
     }
 
+
     /** Turns the top card over when the pile has cards but none of them is face up. */
     public void revealTopIfHidden() {
         if (size > 0 && faceUpCount == 0) {
             faceUpCount = 1;
+        }
+    }
+
+    private void ensureNotFull() {
+        if (size >= cards.length) {
+            throw new IllegalStateException("The pile is full.");
         }
     }
 }
