@@ -115,11 +115,11 @@ So you can type `input.txt` for a bundled file or `C:\decks\mydeck.txt` for your
 
 The files in `src/main/resources`:
 
-| File | Contents |
-|------|----------|
-| `input.txt`, `deck.txt` | Valid 52-card decks in suit order |
-| `cards.txt` | Invalid on purpose: contains `D-A` twice (the program reports a duplicate card) |
-| `file.txt` | Invalid on purpose: contains `D-` with no rank (the program reports an invalid card) |
+| File                    | Contents                                                                             |
+|-------------------------|--------------------------------------------------------------------------------------|
+| `input.txt`, `wrongformat.txt` | Valid 52-card decks in suit order                                                    |
+| `duplicate.txt`             | Invalid on purpose: contains `D-A` twice (the program reports a duplicate card)      |
+| `empty.txt`              | Invalid on purpose: contains `D-` with no rank (the program reports an invalid card) |
 
 A deck is rejected if a card is badly written, appears twice, or the total is not exactly 52.
 
