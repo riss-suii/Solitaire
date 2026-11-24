@@ -25,12 +25,19 @@ public enum Suit {
         return red;
     }
 
-    public static Suit   fromSymbol(String text) {
+    /**
+     * Finds the suit with the given symbol.
+     *
+     * @param text the suit symbol, for example {@code D}
+     * @return the matching suit
+     * @throws IllegalArgumentException if no suit has that symbol
+     */
+    public static Suit fromSymbol(String text) {
         for (Suit currentSuit : values()) {
             if (currentSuit.symbol.equals(text)) {
                 return currentSuit;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Unknown suit \"" + text + "\"");
     }
 }

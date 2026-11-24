@@ -5,6 +5,7 @@ import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.Deck;
+import com.svi.solitaire.util.CardFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -107,7 +108,7 @@ public class FileLoader {
         try {
             Suit suit = Suit.fromSymbol(tokenizer.nextToken());
             Rank rank = Rank.fromSymbol(tokenizer.nextToken());
-            return new Card(rank, suit);
+            return CardFactory.of(rank, suit);
         } catch (IllegalArgumentException e) {
             throw new DeckLoadException("Invalid card \"" + token + "\": " + e.getMessage() + ".", e);
         }

@@ -44,7 +44,7 @@ public class Foundation {
     /** The top card of a suit's pile, or null when it is empty. */
     public Card top(Suit suit) {
         int height = heights[suit.ordinal()];
-        return height == 0 ? null : new Card(Rank.values()[height - 1], suit);
+        return height == 0 ? null : CardFactory.of(RANKS[height - 1], suit);
     }
 
     /**

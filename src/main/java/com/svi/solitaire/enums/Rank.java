@@ -30,12 +30,19 @@ public enum Rank {
         return ordinal() + 1;
     }
 
+    /**
+     * Finds the rank with the given symbol.
+     *
+     * @param text the rank symbol, for example {@code A} or {@code 10}
+     * @return the matching rank
+     * @throws IllegalArgumentException if no rank has that symbol
+     */
     public static Rank fromSymbol(String text) {
         for (Rank currentRank : values()) {
             if (currentRank.symbol.equals(text)) {
                 return currentRank;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Unknown rank \"" + text + "\"");
     }
 }
