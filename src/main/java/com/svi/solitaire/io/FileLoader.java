@@ -40,6 +40,10 @@ public class FileLoader {
         try (InputStream input = openFile(fileName);
              BufferedReader reader = new BufferedReader(
                      new InputStreamReader(input, StandardCharsets.UTF_8))) {
+            reader.mark(1);
+            if (reader.read() != '\uFEFF') {
+                reader.reset();
+            }
             return readCards(reader);
         } catch (IOException e) {
             throw new DeckLoadException("File cannot be opened.", e);
