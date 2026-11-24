@@ -79,7 +79,8 @@ public class RuleBasedPlayer {
         stuck = stuck || talonUseless;
 
         Best best = new Best();
-        boolean kingReady = isKingReady(view);
+        // a King is "ready" only if there are more Kings available than columns already empty
+        boolean kingReady = countReadyKings(view) > countEmptyPiles(view);
         int emptyPile = firstEmptyPile(view);
 
         offerFoundationMoves(view, stuck, best);
@@ -109,8 +110,10 @@ public class RuleBasedPlayer {
             if (card == null || !fitsFoundation(view, card)) {
                 continue;
             }
-            int score = isFree(view, card) ? FREE_TO_FOUNDATION : stuck ? STUCK_TO_FOUNDATION : 0;
-            best.offer(BoardMove.tableauToFoundation(pile, card.suit().ordinal()), score + pile);
+            int base = isFree(view, card) ? FREE_TO_FOUNDATION : stuck ? STUCK_TO_FOUNDATION : 0;
+            if (base > 0) {
+                best.offer(BoardMove.tableauToFoundation(pile, card.suit().ordinal()), base + pile);
+            }
         }
     }
 
@@ -220,29 +223,40 @@ public class RuleBasedPlayer {
     // ----------------------------------------------------------------- helpers
 
     /**
-     * Is there a King that could fill an empty column? It may be in the waste, in the
+     * Counts the Kings that could fill an empty column. A King may be in the waste, in the
      * stock (once its order is known), or at the bottom of a face-up run that sits on hidden cards.
      */
-    private boolean isKingReady(PlayerView view) {
+    private int countReadyKings(PlayerView view) {
+        int count = 0;
         for (Card card : view.waste()) {
             if (card.rank() == Rank.KING) {
-                return true;
+                count++;
             }
         }
         if (view.knownStock() != null) {
             for (Card card : view.knownStock()) {
                 if (card.rank() == Rank.KING) {
-                    return true;
+                    count++;
                 }
             }
         }
         for (int pile = 0; pile < PILES; pile++) {
             List<Card> run = view.faceUpCards(pile);
             if (!run.isEmpty() && run.getFirst().rank() == Rank.KING && view.faceDownCount(pile) > 0) {
-                return true;
+                count++;
             }
         }
-        return false;
+        return count;
+    }
+
+    private static int countEmptyPiles(PlayerView view) {
+        int count = 0;
+        for (int pile = 0; pile < PILES; pile++) {
+            if (view.faceDownCount(pile) + view.faceUpCards(pile).size() == 0) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /** True when the player has seen every card of the waste and stock. */
