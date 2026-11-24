@@ -3,10 +3,6 @@ package com.svi.solitaire.shuffle;
 /** Perfect in-shuffle: the original top card moves to the second position. */
 public class PerfectInShuffle extends PerfectShuffle {
 
-    public PerfectInShuffle() {
-        this(1);
-    }
-
     public PerfectInShuffle(int rounds) {
         super(rounds);
     }

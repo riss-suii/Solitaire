@@ -1,7 +1,6 @@
 package com.svi.solitaire.strategy;
 
 import com.svi.solitaire.constants.GameConstants;
-import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.models.Card;
 import com.svi.solitaire.game.GameState;
 
@@ -22,7 +21,6 @@ public final class PlayerView {
     private static final int PILES = GameConstants.TABLEAU_PILE_COUNT;
     private static final int SUITS = GameConstants.FOUNDATION_COUNT;
 
-    private final DrawMode drawMode;
     private final int[] faceDown = new int[PILES];
     private final List<List<Card>> faceUp = new ArrayList<>();
     private final int[] foundation = new int[SUITS];
@@ -32,7 +30,6 @@ public final class PlayerView {
     private final List<Card> knownStock;
 
     private PlayerView(GameState state, boolean talonKnown) {
-        this.drawMode = state.getDrawMode();
         for (int pile = 0; pile < PILES; pile++) {
             faceDown[pile] = state.getFaceDownCount(pile);
             List<Card> visible = new ArrayList<>();
@@ -63,10 +60,6 @@ public final class PlayerView {
         return new PlayerView(state, talonKnown);
     }
 
-    public DrawMode getDrawMode() {
-        return drawMode;
-    }
-
     public int faceDownCount(int pile) {
         return faceDown[pile];
     }
@@ -91,4 +84,5 @@ public final class PlayerView {
     public List<Card> knownStock() {
         return knownStock;
     }
+
 }

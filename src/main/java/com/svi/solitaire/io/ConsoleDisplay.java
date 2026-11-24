@@ -193,7 +193,7 @@ public class ConsoleDisplay {
 
     public void showStatistics(SimulationStatistics stats, DrawMode drawMove, String shuffleName) {
         out.println();
-        out.println(style(Colors.CYAN, titleLine("SIMULATION RESULTS")));
+        out.println(style(Colors.CYAN, titleLine()));
         out.printf("  Draw mode          : Draw %d%n", drawMove.getCount());
         out.printf("  Shuffle            : %s%n", shuffleName);
         out.printf("  Games played       : %d%n", stats.getGamesPlayed());
@@ -233,8 +233,8 @@ public class ConsoleDisplay {
         return text.length() >= width ? text : text + " ".repeat(width - text.length());
     }
 
-    private static String titleLine(String title) {
-        String padded = " " + title + " ";
+    private static String titleLine() {
+        String padded = " " + "SIMULATION RESULTS" + " ";
         int side = Math.max(0, (WIDTH - padded.length()) / 2);
         return "=".repeat(side) + padded + "=".repeat(Math.max(0, WIDTH - side - padded.length()));
     }

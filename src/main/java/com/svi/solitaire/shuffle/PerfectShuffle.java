@@ -25,10 +25,6 @@ public abstract class PerfectShuffle implements ShuffleStrategy {
         this.rounds = rounds;
     }
 
-    public int getRounds() {
-        return rounds;
-    }
-
     /** True when the card from the top half is placed first in each pair. */
     protected abstract boolean topHalfFirst();
 
