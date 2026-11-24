@@ -15,19 +15,18 @@ import java.util.Optional;
  *
  * <p>It receives a {@link PlayerView} (face-up cards, how many cards are face down, foundations,
  * waste, stock size and - once the stock has been turned over - the stock order), so it can never
- * look at a face-down card. Each call scans the whole board (rule 6) and returns one move:
+ * look at a face-down card. Each call scans the whole board and returns one move:
  *
  * <ol>
  *   <li><b>Free foundation moves.</b> Aces and 2s, and any card that can no longer be needed as a
- *       parent in the tableau, go up at once. Other cards are not sent up (rule 2).</li>
- *   <li><b>King with a stack into an empty column</b> (rule 3).</li>
- *   <li><b>Flip a face-down card</b> (rule 1): move a pile's whole face-up run onto another pile.
+ *       parent in the tableau, go up at once. Other cards are not sent up.</li>
+ *   <li><b>King with a stack into an empty column</b>.</li>
+ *   <li><b>Flip a face-down card</b>: move a pile's whole face-up run onto another pile.
  *       The last column is attacked first; the run lands on the pile with the fewest hidden cards.</li>
- *   <li><b>A King from the waste into an empty column</b> (rule 3).</li>
- *   <li><b>Empty a column</b>, but only when a King is ready to fill it (rules 3 and 4: the waste and
- *       the known stock are checked).</li>
+ *   <li><b>A King from the waste into an empty column</b>.</li>
+ *   <li><b>Empty a column</b>, but only when a King is ready to fill it.</li>
  *   <li><b>Waste card onto the tableau.</b></li>
- *   <li><b>Stock</b> - only when nothing above is possible (rule 5), and only while some card in the
+ *   <li><b>Stock</b> - only when nothing above is possible, and only while some card in the
  *       waste or stock could still be played. Flipped cards are remembered: once every talon card has
  *       been seen and none of them fits the board, cycling the stock again is pointless.</li>
  * </ol>
@@ -115,7 +114,7 @@ public class RuleBasedPlayer {
         }
     }
 
-    /** Rule 2: Aces and 2s are never needed in the tableau; others only when both parents are already up. */
+    /** Aces and 2s are never needed in the tableau; others only when both parents are already up. */
     private boolean isFree(PlayerView view, Card card) {
         int rank = card.getRank().getValue();
         if (rank <= 2) {
@@ -209,7 +208,7 @@ public class RuleBasedPlayer {
 
     // ------------------------------------------------------------------ stock
 
-    /** Rule 5: the stock is the last resort. */
+    /** The stock is the last resort. */
     private void offerStockMove(PlayerView view, Best best) {
         if (view.stockSize() > 0) {
             best.offer(BoardMove.draw(), DRAW);
@@ -221,7 +220,7 @@ public class RuleBasedPlayer {
     // ----------------------------------------------------------------- helpers
 
     /**
-     * Rules 3 and 4: is there a King that could fill an empty column? It may be in the waste, in the
+     * Is there a King that could fill an empty column? It may be in the waste, in the
      * stock (once its order is known), or at the bottom of a face-up run that sits on hidden cards.
      */
     private boolean isKingReady(PlayerView view) {
