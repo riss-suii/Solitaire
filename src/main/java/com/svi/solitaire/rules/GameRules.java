@@ -4,8 +4,8 @@ import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
-import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.models.BoardMove;
+import com.svi.solitaire.game.GameState;
 
 /** Klondike rules: what may be stacked where, which moves are legal, and when the game is won. */
 public class GameRules {

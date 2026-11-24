@@ -3,7 +3,6 @@ package com.svi.solitaire.game;
 import com.svi.solitaire.constants.PlayLimits;
 import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.enums.MoveType;
-import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.rules.GameRules;
 import com.svi.solitaire.strategy.PlayerView;
 import com.svi.solitaire.strategy.RuleBasedPlayer;

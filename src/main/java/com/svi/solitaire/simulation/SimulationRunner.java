@@ -3,9 +3,9 @@ package com.svi.solitaire.simulation;
 import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.models.Deck;
-import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.game.GameEngine;
 import com.svi.solitaire.game.GameInitializer;
+import com.svi.solitaire.game.GameState;
 import com.svi.solitaire.shuffle.ShuffleStrategy;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +27,7 @@ public class SimulationRunner {
     /**
      * @param startingDeck     the deck every game starts from before it is shuffled
      * @param games            number of games
-     * @param drawMove         draw 1 or draw 3
+     * @param drawMode         draw 1 or draw 3
      * @param shuffleFor       gives the shuffle to use for game index i
      * @param progressListener called with the number of finished games (may be null); invoked from worker threads
      */

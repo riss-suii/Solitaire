@@ -3,7 +3,6 @@ package com.svi.solitaire.game;
 import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.models.Deck;
-import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.shuffle.ShuffleStrategy;
 
 /**

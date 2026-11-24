@@ -46,7 +46,7 @@ public class Card {
     @Override
     public String toString() {
         {
-            return this.rank.getSymbol() + "-" + this.suit.getSymbol();
+            return this.suit.getSymbol() + "-" + this.rank.getSymbol();
         }
     }
 }

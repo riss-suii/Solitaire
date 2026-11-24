@@ -1,8 +1,9 @@
-package com.svi.solitaire.models;
+package com.svi.solitaire.game;
 
 import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.enums.Suit;
+import com.svi.solitaire.models.Card;
 import com.svi.solitaire.models.piles.Foundation;
 import com.svi.solitaire.models.piles.Stock;
 import com.svi.solitaire.models.piles.TableauPile;

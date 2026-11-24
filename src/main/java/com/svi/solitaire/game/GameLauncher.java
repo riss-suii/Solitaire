@@ -7,7 +7,6 @@ import com.svi.solitaire.io.DeckLoadException;
 import com.svi.solitaire.io.FileLoader;
 import com.svi.solitaire.io.InputHandler;
 import com.svi.solitaire.models.Deck;
-import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.rules.GameRules;
 import com.svi.solitaire.shuffle.ShuffleFactory;
 import com.svi.solitaire.shuffle.ShuffleStrategy;
@@ -87,8 +86,8 @@ public class GameLauncher {
                 view, input, fileLoader, simulation);
         try {
             runner.run();
-        } catch (InputHandler.InputEndedException | InterruptedException e) {
-            out.println();
+        } catch (Exception e) {
+            out.println("An unexpected error occurred: " + e.getMessage());
         } finally {
             scanner.close();
         }
@@ -164,7 +163,7 @@ public class GameLauncher {
         } else if (shuffle == SHUFFLE_NONE) {
             shuffleStrategy = shuffles.none();
         } else {
-            int rounds = input.askNumber("Number of perfect shuffles : ", 1, 100);
+            int rounds = input.askNumber("Number of perfect shuffles : ", 1, 52);
             shuffleStrategy = shuffle == SHUFFLE_PERFECT_IN ? shuffles.perfectIn(rounds) : shuffles.perfectOut(rounds);
         }
         view.showMessage("Shuffle: " + shuffleStrategy.getName() + "   |   Draw " + drawMode.getCount());

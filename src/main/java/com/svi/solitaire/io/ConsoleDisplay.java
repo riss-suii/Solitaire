@@ -6,10 +6,10 @@ import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.enums.GameStatus;
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
-import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.rules.GameRules;
 import com.svi.solitaire.simulation.SimulationStatistics;
 import com.svi.solitaire.models.BoardMove;
+import com.svi.solitaire.game.GameState;
 
 import java.io.PrintStream;
 

@@ -2,7 +2,6 @@ package com.svi.solitaire.game;
 
 import com.svi.solitaire.enums.Suit;
 import com.svi.solitaire.models.Card;
-import com.svi.solitaire.models.GameState;
 import com.svi.solitaire.models.BoardMove;
 
 /** Applies moves to a {@link GameState}. Assumes the move was validated already. */

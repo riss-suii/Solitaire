@@ -3,7 +3,7 @@ package com.svi.solitaire.strategy;
 import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.DrawMode;
 import com.svi.solitaire.models.Card;
-import com.svi.solitaire.models.GameState;
+import com.svi.solitaire.game.GameState;
 
 import java.util.ArrayList;
 import java.util.List;
