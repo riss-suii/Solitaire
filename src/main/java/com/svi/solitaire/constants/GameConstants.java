@@ -16,9 +16,10 @@ public final class GameConstants {
 
     /** Cards left in the stock after dealing the tableau (52 - 28). */
     public static final int STOCK_SIZE = 24;
-    /** Capacity of one tableau pile: 6 face-down cards + a full King-to-Ace run of 13 = 19 at most, plus one spare slot. */
+    /** Capacity of one tableau pile: at most 6 face-down cards plus a full King-to-Ace run of 13 = 19. */
     public static final int MAX_TABLEAU_PILE_SIZE = 19;
 
+    /** Not instantiable: this class only holds constants. */
     private GameConstants() {
     }
 }

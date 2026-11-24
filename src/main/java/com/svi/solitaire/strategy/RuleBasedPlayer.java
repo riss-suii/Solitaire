@@ -57,11 +57,18 @@ public class RuleBasedPlayer {
 
     private final GameRules rules;
 
+    /**
+     * Creates a player.
+     *
+     * @param rules used to check which cards fit where
+     */
     public RuleBasedPlayer(GameRules rules) {
         this.rules = rules;
     }
 
     /**
+     * Returns the next move, or empty when none is possible.
+     *
      * @param view  what the player can see
      * @param stuck true when this position has already come up before, so the usual moves are exhausted
      * @return the next move, or empty when none is possible

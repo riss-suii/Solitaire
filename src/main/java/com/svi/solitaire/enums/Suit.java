@@ -1,12 +1,16 @@
 package com.svi.solitaire.enums;
 
 /**
- * The declaration order is also the foundation order (index = ordinal()).
+ * The four suits. The declaration order is also the foundation order (index = {@code ordinal()}).
  */
 public enum Suit {
+    /** Hearts (red). */
     HEARTS("H", true),
+    /** Diamonds (red). */
     DIAMONDS("D", true),
+    /** Clubs (black). */
     CLUBS("C", false),
+    /** Spades (black). */
     SPADES("S", false);
 
     private final String symbol;
@@ -17,10 +21,20 @@ public enum Suit {
         this.red = red;
     }
 
+    /**
+     * Returns the symbol used in deck files and on the board, for example {@code H}.
+     *
+     * @return the symbol used in deck files and on the board, for example {@code H}
+     */
     public String getSymbol() {
         return symbol;
     }
 
+    /**
+     * Returns true for hearts and diamonds, false for clubs and spades.
+     *
+     * @return true for hearts and diamonds, false for clubs and spades
+     */
     public boolean isRed() {
         return red;
     }

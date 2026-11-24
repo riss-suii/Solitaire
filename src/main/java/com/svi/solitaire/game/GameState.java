@@ -13,10 +13,10 @@ import java.util.List;
 /**
  * Complete, compact game position: seven tableau piles, the foundations and the talon.
  *
- * <p>Tableau piles are fixed arrays; {@code faceUp[pile]} says how many cards at the end of a pile
- * are face up. The stock and waste together are held by a single {@link Talon}: cards
- * {@code [0, pointer)} are the waste (last one on top) and cards {@code [pointer, size)} are the
- * stock, so turning the waste back over keeps the original order.
+ * <p>Each {@link TableauPile} knows how many of its top cards are face up. The stock and waste
+ * together are held by a single {@link Talon}: cards {@code [0, pointer)} are the waste (last one on
+ * top) and cards {@code [pointer, size)} are the stock, so turning the waste back over keeps the
+ * original order.
  *
  * <p>This class only stores state and exposes low-level mutators. Game logic lives in
  * {@code MoveExecutor}; legality lives in {@code GameRules}.
@@ -30,6 +30,11 @@ public class GameState {
     private final Foundation foundation;
     private final Talon talon;
 
+    /**
+     * Creates an empty position: empty piles, empty foundations and an empty talon.
+     *
+     * @param drawMode how many cards a draw turns over
+     */
     public GameState(DrawMode drawMode) {
         this.drawMode = drawMode;
         this.tableau = new TableauPile[PILES];
@@ -43,34 +48,69 @@ public class GameState {
     // ------------------------------------------------------------------ queries
 
     /**
-     * @return how many cards a draw turns over
+     * Returns the draw mode of this game (how many cards a draw turns over).
+     *
+     * @return the draw mode of this game (how many cards a draw turns over)
      */
     public DrawMode getDrawMode() {
         return drawMode;
     }
 
+    /**
+     * Returns the number of cards in the pile, face up and face down.
+     *
+     * @param pile the tableau pile, 0 to 6
+     * @return the number of cards in the pile, face up and face down
+     */
     public int getTableauSize(int pile) {
         return tableau[pile].size();
     }
 
+    /**
+     * Returns how many cards at the top of the pile are face up.
+     *
+     * @param pile the tableau pile, 0 to 6
+     * @return how many cards at the top of the pile are face up
+     */
     public int getFaceUpCount(int pile) {
         return tableau[pile].getFaceUpCount();
     }
 
+    /**
+     * Returns how many cards at the bottom of the pile are face down.
+     *
+     * @param pile the tableau pile, 0 to 6
+     * @return how many cards at the bottom of the pile are face down
+     */
     public int getFaceDownCount(int pile) {
         return tableau[pile].getFaceDownCount();
     }
 
+    /**
+     * Returns the card at that position.
+     *
+     * @param pile  the tableau pile, 0 to 6
+     * @param index the position in the pile, 0 = bottom
+     * @return the card at that position
+     * @throws IndexOutOfBoundsException if the index is not inside the pile
+     */
     public Card getTableauCard(int pile, int index) {
         return tableau[pile].getPosition(index);
     }
 
-    /** Top (last) card of a pile, or null when empty. */
+    /**
+     * Returns the top (last) card of the pile, or null when it is empty.
+     *
+     * @param pile the tableau pile, 0 to 6
+     * @return the top (last) card of the pile, or null when it is empty
+     */
     public Card getTopTableauCard(int pile) {
         return tableau[pile].getTop();
     }
 
     /**
+     * Returns how many cards are on that suit's foundation.
+     *
      * @param suitIndex the suit's ordinal
      * @return how many cards are on that suit's foundation
      */
@@ -78,66 +118,86 @@ public class GameState {
         return foundation.height(suitIndex);
     }
 
+    /**
+     * Returns how many cards are on that suit's foundation.
+     *
+     * @param suit the suit of the foundation
+     * @return how many cards are on that suit's foundation
+     */
     public int getFoundationHeight(Suit suit) {
         return foundation.height(suit);
     }
 
+    /**
+     * Returns the top card of that foundation, or null when it is empty.
+     *
+     * @param suit the suit of the foundation
+     * @return the top card of that foundation, or null when it is empty
+     */
     public Card getTopFoundationCard(Suit suit) {
         return foundation.top(suit);
     }
 
+    /**
+     * Returns how many cards are on all four foundations together.
+     *
+     * @return how many cards are on all four foundations together
+     */
     public int getTotalFoundationCards() {
         return foundation.total();
     }
 
     /**
+     * Returns how many cards are still in the stock.
+     *
      * @return how many cards are still in the stock
      */
     public int getStockSize() {
-        return talon.stockSize();
+        return talon.getCards().size() - talon.getPointer();
     }
 
     /**
+     * Returns how many cards are in the waste.
+     *
      * @return how many cards are in the waste
      */
     public int getWasteSize() {
-        return talon.wasteSize();
-    }
-
-    /** Top (playable) card of the waste, or null when the waste is empty. */
-    public Card getWasteTop() {
-        return talon.wasteTop();
+        return talon.getPointer();
     }
 
     /**
+     * Returns the top (playable) card of the waste, or null when the waste is empty.
+     *
+     * @return the top (playable) card of the waste, or null when the waste is empty
+     */
+    public Card getWasteTop() {
+        int pointer = talon.getPointer();
+        return pointer == 0 ? null : talon.getCards().get(pointer - 1);
+    }
+
+    /**
+     * Returns the waste card at that position.
+     *
      * @param index the position in the waste, from 0 (oldest) to {@code getWasteSize() - 1} (top)
      * @return the waste card at that position
      * @throws IndexOutOfBoundsException if the index is not inside the waste
      */
     public Card getWasteCard(int index) {
-        if (index < 0 || index >= talon.wasteSize()) {
+        if (index < 0 || index >= talon.getPointer()) {
             throw new IndexOutOfBoundsException("Waste index out of range: " + index);
         }
-        return talon.getPosition(index);
-    }
-
-    /** Stock and waste together: waste cards first, then the stock in draw order. */
-    public int getTalonSize() {
-        return talon.size();
-    }
-
-    /** Number of talon cards already in the waste. */
-    public int getPointer() {
-        return talon.wasteSize();
+        return talon.getCards().get(index);
     }
 
     /**
+     * Returns the talon card at that position.
+     *
      * @param index the position in the combined talon (waste cards first, then the stock)
      * @return the talon card at that position
      * @throws IndexOutOfBoundsException if the index is outside the talon
      */
     public Card getTalonCard(int index) {
-        return talon.getPosition(index);
+        return talon.getCards().get(index);
     }
 
     // ---------------------------------------------------------------- mutators
@@ -145,6 +205,8 @@ public class GameState {
     /**
      * Puts a card on top of a tableau pile during the initial deal.
      *
+     * @param pile     the tableau pile, 0 to 6
+     * @param card     the card to deal
      * @param isFaceUp true if the card is dealt face up
      */
     public void dealToTableau(int pile, Card card, boolean isFaceUp) {
@@ -154,54 +216,84 @@ public class GameState {
     /**
      * Fills the stock in draw order (first element is drawn first) and empties the waste.
      *
+     * @param cards the cards for the stock
      * @throws IllegalArgumentException if there are more cards than the stock can hold
      */
     public void setStock(List<Card> cards) {
         if (cards.size() > GameConstants.STOCK_SIZE) {
             throw new IllegalArgumentException("Too many stock cards: " + cards.size());
         }
-        talon.load(cards);
+        talon.setCards(cards);
     }
 
+    /**
+     * Removes the top card of a tableau pile. It does not turn over the card below; see
+     * {@link #revealTopIfHidden(int)}.
+     *
+     * @param pile the tableau pile, 0 to 6
+     * @return the removed card
+     * @throws IllegalStateException if the pile is empty
+     */
     public Card removeTableauTop(int pile) {
         return tableau[pile].removeTop();
     }
 
-    /** Puts a card face up on top of a tableau pile (used by moves, not by the initial deal). */
+    /**
+     * Puts a card face up on top of a tableau pile (used by moves, not by the initial deal).
+     *
+     * @param pile the tableau pile, 0 to 6
+     * @param card the card to add
+     */
     public void addTableauTop(int pile, Card card) {
         tableau[pile].addFaceUp(card);
     }
 
-    /** Turns the top card over when a pile has cards but none face up. */
+    /**
+     * Turns the top card over when a pile has cards but none face up.
+     *
+     * @param pile the tableau pile, 0 to 6
+     */
     public void revealTopIfHidden(int pile) {
         tableau[pile].revealTopIfHidden();
     }
 
     /**
-     * Removes the top card of the waste, for example when it is played onto the tableau or a
-     * foundation.
+     * Sets how many talon cards are in the waste; the rest are the stock.
      *
-     * @return the card that was on top of the waste
-     * @throws IllegalStateException if the waste is empty
+     * @param wasteSize the new number of waste cards
+     * @throws IndexOutOfBoundsException if it is outside {@code [0, getTalonSize()]}
      */
-    public Card removeWasteTop() {
-        return talon.removeWasteTop();
+    public void setWasteSize(int wasteSize) {
+        talon.setPointer(wasteSize);
     }
 
-    /** Turns {@code drawMode.getCount()} cards (or what is left) from the stock onto the waste. */
-    public void draw() {
-        talon.draw(getDrawMode().getCount());
+    /**
+     * Removes a card from the talon. The waste size is not changed, so the caller must update it.
+     *
+     * @param index the position in the combined talon (waste cards first, then the stock)
+     * @return the removed card
+     * @throws IndexOutOfBoundsException if the index is outside the talon
+     */
+    public Card removeTalonCard(int index) {
+        return talon.removeCard(index);
     }
 
-    /** Flips the waste back over to become the stock (order is preserved). */
-    public void recycle() {
-        talon.recycle();
-    }
-
+    /**
+     * Adds the next card of a suit to its foundation.
+     *
+     * @param suit the suit of the foundation
+     * @throws IllegalStateException if the foundation is already complete
+     */
     public void addToFoundation(Suit suit) {
         foundation.push(suit);
     }
 
+    /**
+     * Removes the top card of a suit's foundation.
+     *
+     * @param suit the suit of the foundation
+     * @throws IllegalStateException if the foundation is empty
+     */
     public void removeFromFoundation(Suit suit) {
         foundation.pop(suit);
     }
@@ -211,6 +303,8 @@ public class GameState {
     /**
      * 64-bit fingerprint of the exact position, including how far the stock has been turned, so every
      * draw changes it. Used to notice that a position has come back.
+     *
+     * @return the fingerprint of the current position
      */
     public long exactFingerprint() {
         long h = 0x243F6A8885A308D3L;
@@ -225,11 +319,10 @@ public class GameState {
         for (int suit = 0; suit < GameConstants.FOUNDATION_COUNT; suit++) {
             h = mix(h, 3000 + foundation.height(suit));
         }
-        int talon = getTalonSize();
-        for (int i = 0; i < talon; i++) {
-            h = mix(h, getTalonCard(i).id() + 1);
+        for (Card card : talon.getCards()) {
+            h = mix(h, card.id() + 1);
         }
-        return mix(h, 4000 + getPointer());
+        return mix(h, 4000 + talon.getPointer());
     }
 
     private static long mix(long h, long v) {

@@ -55,32 +55,70 @@ public final class PlayerView {
         }
     }
 
-    /** What the player sees in {@code state}. {@code talonKnown}: the stock has been recycled at least once. */
+    /**
+     * Builds what the player can see of a position.
+     *
+     * @param state      the real position
+     * @param talonKnown true once the stock has been recycled at least once, so its order is known
+     * @return the view; it does not change when the state changes
+     */
     public static PlayerView of(GameState state, boolean talonKnown) {
         return new PlayerView(state, talonKnown);
     }
 
+    /**
+     * Returns how many cards of the pile are face down.
+     *
+     * @param pile the tableau pile, 0 to 6
+     * @return how many cards of the pile are face down
+     */
     public int faceDownCount(int pile) {
         return faceDown[pile];
     }
 
+    /**
+     * Returns the face-up cards of the pile, bottom of the run first.
+     *
+     * @param pile the tableau pile, 0 to 6
+     * @return the face-up cards of the pile, bottom of the run first
+     */
     public List<Card> faceUpCards(int pile) {
         return faceUp.get(pile);
     }
 
+    /**
+     * Returns how many cards are on that suit's foundation.
+     *
+     * @param suit the suit's ordinal
+     * @return how many cards are on that suit's foundation
+     */
     public int foundationHeight(int suit) {
         return foundation[suit];
     }
 
+    /**
+     * Returns the waste, oldest card first; the last card is the playable one.
+     *
+     * @return the waste, oldest card first; the last card is the playable one
+     */
     public List<Card> waste() {
         return waste;
     }
 
+    /**
+     * Returns how many cards are left in the stock.
+     *
+     * @return how many cards are left in the stock
+     */
     public int stockSize() {
         return stockSize;
     }
 
-    /** The stock in draw order, or null when the player has not seen those cards yet. */
+    /**
+     * The stock in draw order.
+     *
+     * @return the stock cards, or null when the player has not seen them yet
+     */
     public List<Card> knownStock() {
         return knownStock;
     }

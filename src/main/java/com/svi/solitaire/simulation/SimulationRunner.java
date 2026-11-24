@@ -19,17 +19,26 @@ public class SimulationRunner {
     private final GameEngine engine;
     private final GameInitializer initializer;
 
+    /**
+     * Creates a runner.
+     *
+     * @param engine      plays each game
+     * @param initializer shuffles and deals each game
+     */
     public SimulationRunner(GameEngine engine, GameInitializer initializer) {
         this.engine = engine;
         this.initializer = initializer;
     }
 
     /**
+     * Plays many games in parallel without any display and gathers the results.
+     *
      * @param startingDeck     the deck every game starts from before it is shuffled
      * @param games            number of games
      * @param drawMode         draw 1 or draw 3
      * @param shuffleFor       gives the shuffle to use for game index i
      * @param progressListener called with the number of finished games (may be null); invoked from worker threads
+     * @return the wins and losses of all games
      */
     public SimulationStatistics run(Deck startingDeck, int games, DrawMode drawMode,
                                     IntFunction<ShuffleStrategy> shuffleFor,

@@ -12,7 +12,17 @@ public class GameRules {
 
     private static final int PILES = GameConstants.TABLEAU_PILE_COUNT;
 
-    /** A card goes on a tableau pile if colors alternate and rank is one lower; only Kings go on an empty pile. */
+    /** Creates the rules. They hold no state. */
+    public GameRules() {
+    }
+
+    /**
+     * A card goes on a tableau pile if colors alternate and rank is one lower; only Kings go on an empty pile.
+     *
+     * @param moving the card (or the bottom card of the run) being moved
+     * @param target the top card of the destination pile, or null when that pile is empty
+     * @return true if {@code moving} may be placed there
+     */
     public boolean canPlaceOnTableau(Card moving, Card target) {
         if (target == null) {
             return moving.getRank() == Rank.KING;
@@ -21,17 +31,34 @@ public class GameRules {
                 && target.getRank().getValue() == moving.getRank().getValue() + 1;
     }
 
-    /** A card goes on its foundation if it is the next rank up. */
+    /**
+     * A card goes on its foundation if it is the next rank up.
+     *
+     * @param card             the card to place
+     * @param foundationHeight how many cards its foundation already holds
+     * @return true if the card is the next one the foundation needs
+     */
     public boolean canPlaceOnFoundation(Card card, int foundationHeight) {
         return card.getRank().getValue() == foundationHeight + 1;
     }
 
-    /** A draw turns over the draw-mode count (1 or 3) of cards, or whatever is left in the stock. */
+    /**
+     * A draw turns over the draw-mode count (1 or 3) of cards, or whatever is left in the stock.
+     *
+     * @param state the current position
+     * @return how many cards the next draw turns over
+     */
     public int cardsToDraw(GameState state) {
         return Math.min(state.getDrawMode().getCount(), state.getStockSize());
     }
 
-    /** The card a move picks up (the bottom card of the run for multi-card moves); null for stock moves. */
+    /**
+     * The card a move picks up (the bottom card of the run for multi-card moves).
+     *
+     * @param state the position the move is made in
+     * @param move  the move
+     * @return the card that is picked up, or null for draws and recycles (and for an empty source)
+     */
     public static Card movingCard(GameState state, BoardMove move) {
         return switch (move.type()) {
             case WASTE_TO_TABLEAU, WASTE_TO_FOUNDATION -> state.getWasteTop();
@@ -43,12 +70,23 @@ public class GameRules {
         };
     }
 
-    /** The game is won when all 52 cards are on the foundations. */
+    /**
+     * The game is won when all 52 cards are on the foundations.
+     *
+     * @param state the position to check
+     * @return true if every card is on a foundation
+     */
     public boolean isWon(GameState state) {
         return state.getTotalFoundationCards() == GameConstants.TOTAL_CARDS;
     }
 
-    /** Decides whether a single move is legal in the given position. */
+    /**
+     * Decides whether a single move is legal in the given position.
+     *
+     * @param state the position the move would be made in
+     * @param move  the move to check
+     * @return true if the move is legal
+     */
     public boolean isValid(GameState state, BoardMove move) {
         return switch (move.type()) {
             case DRAW -> state.getStockSize() > 0;

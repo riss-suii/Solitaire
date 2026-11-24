@@ -12,33 +12,59 @@ import com.svi.solitaire.models.Card;
  */
 public class TableauPile {
 
+    /** The cards from bottom (index 0) to top; only the first {@code size} slots are in use. */
     private final Card[] cards = new Card[GameConstants.MAX_TABLEAU_PILE_SIZE];
+    /** Number of cards in the pile. */
     private int size;
+    /** How many cards at the top of the pile are face up. */
     private int faceUpCount;
 
-    /** @return the number of cards in the pile, face up and face down */
+    /** Creates an empty pile. */
+    public TableauPile() {
+    }
+
+    /**
+     * Returns the number of cards in the pile, face up and face down.
+     *
+     * @return the number of cards in the pile, face up and face down
+     */
     public int size() {
         return size;
     }
 
-    /** @return true when the pile has no cards */
+    /**
+     * Returns true when the pile has no cards.
+     *
+     * @return true when the pile has no cards
+     */
     public boolean isEmpty() {
         return size == 0;
     }
 
-    /** @return how many cards at the top of the pile are face up */
+    /**
+     * Returns how many cards at the top of the pile are face up.
+     *
+     * @return how many cards at the top of the pile are face up
+     */
     public int getFaceUpCount() {
         return faceUpCount;
     }
 
-    /** @return how many cards at the bottom of the pile are face down */
+    /**
+     * Returns how many cards at the bottom of the pile are face down.
+     *
+     * @return how many cards at the bottom of the pile are face down
+     */
     public int getFaceDownCount() {
         return size - faceUpCount;
     }
 
     /**
+     * Returns the card at that position.
+     *
      * @param index position from the bottom of the pile (0 = bottom)
      * @return the card at that position
+     * @throws IndexOutOfBoundsException if the index is not inside the pile
      */
     public Card getPosition(int index) {
         if (index < 0 || index >= size) {
@@ -47,7 +73,11 @@ public class TableauPile {
         return cards[index];
     }
 
-    /** @return the top (last) card, or null when the pile is empty */
+    /**
+     * Returns the top (last) card, or null when the pile is empty.
+     *
+     * @return the top (last) card, or null when the pile is empty
+     */
     public Card getTop() {
         return size == 0 ? null : cards[size - 1];
     }
@@ -55,7 +85,9 @@ public class TableauPile {
     /**
      * Puts a card on top of the pile during the initial deal.
      *
+     * @param card     the card to deal
      * @param isFaceUp true if the card is dealt face up
+     * @throws IllegalStateException if the pile is full
      */
     public void deal(Card card, boolean isFaceUp) {
         ensureNotFull();
@@ -65,7 +97,12 @@ public class TableauPile {
         }
     }
 
-    /** Puts a card face up on top of the pile (used by moves, not by the initial deal). */
+    /**
+     * Puts a card face up on top of the pile (used by moves, not by the initial deal).
+     *
+     * @param card the card to add
+     * @throws IllegalStateException if the pile is full
+     */
     public void addFaceUp(Card card) {
         ensureNotFull();
         cards[size++] = card;
@@ -75,7 +112,8 @@ public class TableauPile {
     /**
      * Removes and returns the top card.
      *
-     * @throws ArrayIndexOutOfBoundsException if the pile is empty
+     * @return the removed card
+     * @throws IllegalStateException if the pile is empty
      */
     public Card removeTop() {
         if (size == 0) {
@@ -89,7 +127,6 @@ public class TableauPile {
         return card;
     }
 
-
     /** Turns the top card over when the pile has cards but none of them is face up. */
     public void revealTopIfHidden() {
         if (size > 0 && faceUpCount == 0) {
@@ -97,6 +134,7 @@ public class TableauPile {
         }
     }
 
+    /** Throws if no more cards fit in the pile. */
     private void ensureNotFull() {
         if (size >= cards.length) {
             throw new IllegalStateException("The pile is full.");

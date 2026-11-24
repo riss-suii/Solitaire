@@ -18,6 +18,7 @@ import java.io.PrintStream;
  * colors are ANSI escape codes and can be switched off.
  */
 public class ConsoleDisplay {
+    // layout constants (widths are in characters)
     private static final String FACE_DOWN = "[####]";
     private static final String EMPTY_SLOT = "[    ]";
     private static final int CELL_WIDTH = 6;
@@ -32,6 +33,13 @@ public class ConsoleDisplay {
     private final boolean useColor;
     private final GameRules rules;
 
+    /**
+     * Creates a display.
+     *
+     * @param out   where everything is printed
+     * @param color true to use ANSI colors, false for plain text
+     * @param rules used to describe moves (how many cards a draw turns over)
+     */
     public ConsoleDisplay(PrintStream out, boolean color, GameRules rules) {
         this.out = out;
         this.useColor = color;
@@ -40,6 +48,7 @@ public class ConsoleDisplay {
 
     // ------------------------------------------------------------------ menus
 
+    /** Prints the title banner and the draw-mode menu. */
     public void displayMainMenu() {
         out.println(style(Colors.CYAN, "=".repeat(29) + " KLONDIKE SOLITAIRE " + "=".repeat(29)));
         out.println(style(Colors.BOLD, "                 Every move counts. Every card has its place.\n"));
@@ -49,7 +58,12 @@ public class ConsoleDisplay {
         out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
     }
 
-    /** Prints a centred menu block: title, options, closing rule. */
+    /**
+     * Prints a centred menu block: title, options, closing rule.
+     *
+     * @param title   the heading of the menu
+     * @param options one line per option
+     */
     public void showMenu(String title, String... options) {
         out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
         out.println(style(Colors.BOLD, center(title)));
@@ -61,12 +75,23 @@ public class ConsoleDisplay {
 
     // ------------------------------------------------------------------ board
 
-    /** Header line for one step of the replay, e.g. {@code --- Step 14: Draw 3 cards from the stock ---}. */
+    /**
+     * Prints the header line for one step of the replay, e.g. {@code --- Step 14: Draw 3 cards from the stock ---}.
+     *
+     * @param number the 1-based step number
+     * @param move   the move about to be made
+     * @param before the position the move will be applied to
+     */
     public void showStep(int number, BoardMove move, GameState before) {
         out.println();
         out.println("--- Step " + number + ": " + describe(move, before) + " ---");
     }
 
+    /**
+     * Prints the stock, waste, foundations and the seven tableau piles.
+     *
+     * @param state the position to show
+     */
     public void showBoard(GameState state) {
         out.println(pad("STOCK", STOCK_COLUMN_WIDTH) + pad("WASTE", WASTE_COLUMN_WIDTH) + "FOUNDATIONS");
         out.println(stockText(state) + wasteText(state) + foundationsText(state));
@@ -95,6 +120,7 @@ public class ConsoleDisplay {
         out.println();
     }
 
+    /** The stock column: a face-down card with the number of cards left, or an empty slot. */
     private String stockText(GameState state) {
         if (state.getStockSize() == 0) {
             return pad(EMPTY_SLOT, STOCK_COLUMN_WIDTH);
@@ -118,6 +144,7 @@ public class ConsoleDisplay {
         return text + " ".repeat(Math.max(0, WASTE_COLUMN_WIDTH - shown * CELL_WIDTH));
     }
 
+    /** The four foundation tops in display order; an empty foundation shows its suit letter. */
     private String foundationsText(GameState state) {
         StringBuilder text = new StringBuilder();
         for (Suit suit : FOUNDATION_ORDER) {
@@ -131,6 +158,7 @@ public class ConsoleDisplay {
         return text.toString();
     }
 
+    /** One cell of the tableau grid: a face-down card, a face-up card, an empty slot or blank space. */
     private String tableauCell(GameState state, int pile, int row) {
         int size = state.getTableauSize(pile);
         if (row >= size) {
@@ -143,13 +171,25 @@ public class ConsoleDisplay {
         return style(colorOf(card), cardCell(card));
     }
 
-    /** "[ 4-H]" / "[10-H]": the card right-aligned in four characters. */
+    /**
+     * Formats a card as {@code [ 4-H]} or {@code [10-H]}: right-aligned in four characters.
+     *
+     * @param card the card to format
+     * @return the formatted cell
+     */
     private static String cardCell(Card card) {
         return "[" + String.format("%4s", card) + "]";
     }
 
     // ------------------------------------------------------------------ moves
 
+    /**
+     * Describes a move in words, e.g. {@code Move H-5 from tableau 2 to tableau 4}.
+     *
+     * @param move  the move to describe
+     * @param state the position the move is made in
+     * @return a one-line description
+     */
     public String describe(BoardMove move, GameState state) {
         Card card = GameRules.movingCard(state, move);
         return switch (move.type()) {
@@ -169,6 +209,13 @@ public class ConsoleDisplay {
 
     // ---------------------------------------------------------------- results
 
+    /**
+     * Prints the end-of-game banner with the move count and cards on the foundations.
+     *
+     * @param status     whether the game was won or lost
+     * @param moves      how many moves were made
+     * @param finalState the position the game ended in
+     */
     public void showResult(GameStatus status, int moves, GameState finalState) {
         out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
         if (status == GameStatus.WON) {
@@ -181,20 +228,40 @@ public class ConsoleDisplay {
         out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
     }
 
-    public void showSimulationHeader(int games, DrawMode drawMove, String shuffleName) {
+    /**
+     * Prints the line that announces a simulation run.
+     *
+     * @param games       the number of games about to be played
+     * @param drawMode    the draw mode used
+     * @param shuffleName the name of the shuffle used
+     */
+    public void showSimulationHeader(int games, DrawMode drawMode, String shuffleName) {
         out.println();
         out.println("  Simulating " + games + " game" + (games == 1 ? "" : "s")
-                + "  |  Draw " + drawMove.getCount() + "  |  " + shuffleName);
+                + "  |  Draw " + drawMode.getCount() + "  |  " + shuffleName);
     }
 
+    /**
+     * Prints a progress line during a simulation.
+     *
+     * @param done  how many games have finished
+     * @param total how many games will be played
+     */
     public void showProgress(int done, int total) {
         out.printf("  ... %d / %d games%n", done, total);
     }
 
-    public void showStatistics(SimulationStatistics stats, DrawMode drawMove, String shuffleName) {
+    /**
+     * Prints the results table of a simulation.
+     *
+     * @param stats       the collected results
+     * @param drawMode    the draw mode used
+     * @param shuffleName the name of the shuffle used
+     */
+    public void showStatistics(SimulationStatistics stats, DrawMode drawMode, String shuffleName) {
         out.println();
         out.println(style(Colors.CYAN, titleLine()));
-        out.printf("  Draw mode          : Draw %d%n", drawMove.getCount());
+        out.printf("  Draw mode          : Draw %d%n", drawMode.getCount());
         out.printf("  Shuffle            : %s%n", shuffleName);
         out.printf("  Games played       : %d%n", stats.getGamesPlayed());
         out.printf("  Wins/Losses        : %d/%d%n", stats.getWins(), stats.getLosses());
@@ -202,15 +269,29 @@ public class ConsoleDisplay {
         out.println(style(Colors.CYAN, "=".repeat(WIDTH)));
     }
 
+    /**
+     * Prints one line of plain text.
+     *
+     * @param message the text to print
+     */
     public void showMessage(String message) {
         out.println(message);
     }
 
+    /**
+     * Prints an error line in red.
+     *
+     * @param message the text after {@code Error: }
+     */
     public void showError(String message) {
         out.println(style(Colors.RED, "Error: " + message));
     }
 
-    /** Prints a question without a line break and leaves the cursor after it. */
+    /**
+     * Prints a question without a line break and leaves the cursor after it.
+     *
+     * @param text the question to print
+     */
     public void prompt(String text) {
         out.print(style(Colors.GREEN, text));
         out.flush();
@@ -218,27 +299,41 @@ public class ConsoleDisplay {
 
     // ---------------------------------------------------------------- helpers
 
-    /** Wraps text in an ANSI color; plain text when colors are off. */
+    /**
+     * Wraps text in an ANSI color; plain text when colors are off.
+     *
+     * @param color the color to use
+     * @param text  the text to color
+     * @return the colored text, or the text unchanged when colors are off
+     */
     private String style(Colors color, String text) {
         return useColor ? color.colorize(text) : text;
     }
 
+    /** Red for hearts and diamonds, no color for clubs and spades. */
     private static Colors colorOf(Card card) {
         return card.isRed() ? Colors.RED : Colors.RESET;
-
     }
 
-    /** Pads plain (uncolored) text on the right. */
+    /**
+     * Pads plain (uncolored) text on the right.
+     *
+     * @param text  the text to pad
+     * @param width the wanted width
+     * @return the text, padded with spaces up to the width
+     */
     private static String pad(String text, int width) {
         return text.length() >= width ? text : text + " ".repeat(width - text.length());
     }
 
+    /** The "SIMULATION RESULTS" rule, centred in a line of equals signs. */
     private static String titleLine() {
         String padded = " " + "SIMULATION RESULTS" + " ";
         int side = Math.max(0, (WIDTH - padded.length()) / 2);
         return "=".repeat(side) + padded + "=".repeat(Math.max(0, WIDTH - side - padded.length()));
     }
 
+    /** Indents text so that it is centred in the console width. */
     private static String center(String text) {
         int left = Math.max(0, (WIDTH - text.length()) / 2);
         return " ".repeat(left) + text;

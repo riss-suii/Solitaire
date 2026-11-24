@@ -27,9 +27,14 @@ import java.util.StringTokenizer;
  */
 public class FileLoader {
 
+    /** Creates a file loader. It holds no state. */
+    public FileLoader() {
+    }
+
     /**
      * Reads the named deck file. The name is looked up on the classpath first
      * (e.g. {@code input.txt} from src/main/resources), then as a path on disk.
+     * A UTF-8 byte order mark (BOM) at the start of the file, which some Windows editors add, is skipped.
      *
      * @param fileName the resource name or file path
      * @return a valid deck of exactly 52 different cards, top card first
@@ -53,6 +58,8 @@ public class FileLoader {
     /**
      * Opens the file from the classpath, or from disk when it is not a resource.
      *
+     * @param fileName the resource name or file path
+     * @return a stream over the file; the caller closes it
      * @throws DeckLoadException if no such file exists
      * @throws IOException       if the file exists but cannot be opened
      */
@@ -70,6 +77,11 @@ public class FileLoader {
 
     /**
      * Reads every card from the file and checks the deck rules: no duplicates and exactly 52 cards.
+     *
+     * @param reader the file's contents
+     * @return a valid deck of 52 different cards
+     * @throws IOException       if reading fails
+     * @throws DeckLoadException if a card is invalid or duplicated, or the count is not 52
      */
     private Deck readCards(BufferedReader reader) throws IOException, DeckLoadException {
         int expected = GameConstants.TOTAL_CARDS;
@@ -102,16 +114,18 @@ public class FileLoader {
     /**
      * Converts text such as D-A into a Card object.
      *
+     * @param token one card written as {@code SUIT-RANK}
+     * @return the card
      * @throws DeckLoadException if the text is not {@code SUIT-RANK} or uses an unknown suit or rank
      */
     private Card parseCard(String token) throws DeckLoadException {
-        StringTokenizer tokenizer = new StringTokenizer(token, "-");
-        if (tokenizer.countTokens() != 2) {
+        String[] parts = token.split("-", -1);         // -1 keeps empty parts, so "D-" and "D-A-" are rejected
+        if (parts.length != 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
             throw new DeckLoadException("Invalid card \"" + token + "\" (expected SUIT-RANK, e.g. D-A).");
         }
         try {
-            Suit suit = Suit.fromSymbol(tokenizer.nextToken());
-            Rank rank = Rank.fromSymbol(tokenizer.nextToken());
+            Suit suit = Suit.fromSymbol(parts[0]);
+            Rank rank = Rank.fromSymbol(parts[1]);
             return CardFactory.of(rank, suit);
         } catch (IllegalArgumentException e) {
             throw new DeckLoadException("Invalid card \"" + token + "\": " + e.getMessage() + ".", e);

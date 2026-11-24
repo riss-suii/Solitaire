@@ -21,11 +21,14 @@ public class Foundation {
 
     private final int[] heights;
 
+    /** Creates four empty foundations. */
     public Foundation() {
         this.heights = new int[GameConstants.FOUNDATION_COUNT];
     }
 
     /**
+     * Returns how many cards are on that suit's pile (0 to 13).
+     *
      * @param suit the suit of the pile
      * @return how many cards are on that suit's pile (0 to 13)
      */
@@ -34,6 +37,8 @@ public class Foundation {
     }
 
     /**
+     * Returns how many cards are on that suit's pile (0 to 13).
+     *
      * @param suitIndex the suit's ordinal
      * @return how many cards are on that suit's pile (0 to 13)
      */
@@ -41,7 +46,12 @@ public class Foundation {
         return heights[suitIndex];
     }
 
-    /** The top card of a suit's pile, or null when it is empty. */
+    /**
+     * The top card of a suit's pile.
+     *
+     * @param suit the suit of the pile
+     * @return the top card, or null when the pile is empty
+     */
     public Card top(Suit suit) {
         int height = heights[suit.ordinal()];
         return height == 0 ? null : CardFactory.of(RANKS[height - 1], suit);
@@ -74,6 +84,8 @@ public class Foundation {
     }
 
     /**
+     * Returns how many cards are on all four piles together.
+     *
      * @return how many cards are on all four piles together
      */
     public int total() {

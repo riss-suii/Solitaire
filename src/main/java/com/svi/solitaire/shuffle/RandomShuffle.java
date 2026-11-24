@@ -11,6 +11,11 @@ public class RandomShuffle implements ShuffleStrategy {
 
     private final Random random;
 
+    /**
+     * Creates a shuffle that draws from the given random source.
+     *
+     * @param random the random source
+     */
     public RandomShuffle(Random random) {
         this.random = random;
     }

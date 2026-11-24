@@ -1,5 +1,6 @@
 package com.svi.solitaire.io;
 
+import java.io.Serial;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -12,6 +13,12 @@ public class InputHandler {
     private final Scanner scanner;
     private final ConsoleDisplay display;
 
+    /**
+     * Creates an input handler.
+     *
+     * @param scanner where the answers are read from
+     * @param display where prompts and error messages are printed
+     */
     public InputHandler(Scanner scanner, ConsoleDisplay display) {
         this.scanner = scanner;
         this.display = display;
@@ -19,6 +26,9 @@ public class InputHandler {
 
     /**
      * Prints the prompt and returns the typed line, or null when the input has ended.
+     *
+     * @param prompt the question to show
+     * @return the line the user typed, or null at the end of the input
      */
     public String readLine(String prompt) {
         display.prompt(prompt);
@@ -30,26 +40,9 @@ public class InputHandler {
     }
 
     /**
-     * Asks for 1 or 3 cards per draw.
-     * Repeats until valid input is entered.
-     * Throws {@link InputEndedException} if input ends.
-     */
-    public int askDrawCount() {
-        while (true) {
-            String answer = readLine("Enter your choice : ");
-            if (answer == null) {
-                throw new InputEndedException();
-            }
-            String trimmed = answer.trim();
-            if (trimmed.equals("1") || trimmed.equals("3")) {
-                return Integer.parseInt(trimmed);
-            }
-            display.showError("Please enter 1 or 3.");
-        }
-    }
-
-    /**
-     * Asks which deck file to load. Repeats until a name is typed; returns null only when the input has ended.
+     * Asks which deck file to load. Repeats until a name is typed.
+     *
+     * @return the file name or path, or null when the input has ended
      */
     public String askDeckFile() {
         while (true) {
@@ -65,7 +58,14 @@ public class InputHandler {
         }
     }
 
-    /** Repeats until one of the allowed numbers is entered. Throws {@link InputEndedException} if input ends. */
+    /**
+     * Repeats until one of the allowed numbers is entered.
+     *
+     * @param prompt  the question to show
+     * @param allowed the numbers that are accepted
+     * @return the number the user entered
+     * @throws InputEndedException if the input ends
+     */
     public int askChoice(String prompt, int... allowed) {
         while (true) {
             String answer = readLine(prompt);
@@ -86,7 +86,15 @@ public class InputHandler {
         }
     }
 
-    /** Asks for a number in [min, max]; blank input gives the default. */
+    /**
+     * Repeats until a number in the range {@code [min, max]} is entered.
+     *
+     * @param prompt the question to show
+     * @param min    the smallest accepted number
+     * @param max    the largest accepted number
+     * @return the number the user entered
+     * @throws InputEndedException if the input ends
+     */
     public int askNumber(String prompt, int min, int max) {
         while (true) {
             String answer = readLine(prompt);
@@ -107,6 +115,10 @@ public class InputHandler {
 
     /** Thrown when the input has ended (Ctrl+D / end of piped input). */
     public static class InputEndedException extends RuntimeException {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        /** Creates the exception with the message {@code Input ended}. */
         public InputEndedException() {
             super("Input ended");
         }

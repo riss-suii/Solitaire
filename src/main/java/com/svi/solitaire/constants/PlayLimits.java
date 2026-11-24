@@ -13,6 +13,7 @@ public final class PlayLimits {
     /** Largest number of games accepted for one simulation run. */
     public static final int MAX_SIMULATION_GAMES = 100000;
 
+    /** Not instantiable: this class only holds constants. */
     private PlayLimits() {
     }
 }

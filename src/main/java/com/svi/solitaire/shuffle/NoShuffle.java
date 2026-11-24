@@ -8,6 +8,10 @@ import java.util.List;
 /** Leaves the deck in the order it was loaded, so the same file always deals the same game. */
 public class NoShuffle implements ShuffleStrategy {
 
+    /** Creates a shuffle that keeps the deck as it is. */
+    public NoShuffle() {
+    }
+
     @Override
     public List<Card> shuffle(List<Card> cards) {
         return new ArrayList<>(cards);

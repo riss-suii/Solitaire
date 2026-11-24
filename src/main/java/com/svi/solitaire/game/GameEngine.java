@@ -18,16 +18,33 @@ import java.util.Optional;
  */
 public class GameEngine {
 
-    /** Called around every move (for the console display). */
+    /** Called around every move (for the console display). Both methods do nothing by default. */
     public interface Listener {
+        /**
+         * Called just before a move is applied.
+         *
+         * @param number the 1-based number of the move
+         * @param move   the move about to be made
+         * @param state  the position the move will be applied to
+         */
         default void beforeMove(int number, BoardMove move, GameState state) {
         }
 
+        /**
+         * Called just after a move has been applied.
+         *
+         * @param state the position after the move
+         */
         default void afterMove(GameState state) {
         }
     }
 
-    /** How a game ended. */
+    /**
+     * How a game ended.
+     *
+     * @param status whether the game was won or lost
+     * @param moves  how many moves were made (draws and recycles included)
+     */
     public record Outcome(GameStatus status, int moves) {
     }
 
@@ -38,6 +55,13 @@ public class GameEngine {
     private final MoveExecutor executor;
     private final GameRules rules;
 
+    /**
+     * Creates an engine.
+     *
+     * @param player   chooses each move from a {@link PlayerView}
+     * @param executor applies the chosen moves
+     * @param rules    validates moves and detects a win
+     */
     public GameEngine(RuleBasedPlayer player, MoveExecutor executor, GameRules rules) {
         this.player = player;
         this.executor = executor;
@@ -47,6 +71,11 @@ public class GameEngine {
     /**
      * Plays the game in place. It ends when the game is won, when no move is left, or when the same
      * position keeps coming back (nothing more can be achieved).
+     *
+     * @param state    the dealt game; it is modified as the game is played
+     * @param listener told about every move, or null for none
+     * @return how the game ended and how many moves were made
+     * @throws IllegalStateException if the player picks a move the rules do not allow
      */
     public Outcome play(GameState state, Listener listener) {
         Listener events = listener == null ? SILENT : listener;

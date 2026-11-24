@@ -18,6 +18,12 @@ public abstract class PerfectShuffle implements ShuffleStrategy {
 
     private final int rounds;
 
+    /**
+     * Creates a shuffle that is repeated the given number of times.
+     *
+     * @param rounds how many times the deck is shuffled, at least 1
+     * @throws IllegalArgumentException if rounds is less than 1
+     */
     protected PerfectShuffle(int rounds) {
         if (rounds < 1) {
             throw new IllegalArgumentException("rounds must be >= 1, got " + rounds);
@@ -25,9 +31,18 @@ public abstract class PerfectShuffle implements ShuffleStrategy {
         this.rounds = rounds;
     }
 
-    /** True when the card from the top half is placed first in each pair. */
+    /**
+     * Tells which half supplies the first card of each pair.
+     *
+     * @return true when the card from the top half is placed first in each pair
+     */
     protected abstract boolean topHalfFirst();
 
+    /**
+     * The name of the shuffle without its number of rounds.
+     *
+     * @return the base name, for example {@code Perfect In}
+     */
     protected abstract String baseName();
 
     @Override
