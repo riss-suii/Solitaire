@@ -78,7 +78,7 @@ public class RuleBasedPlayer {
         boolean talonUseless = isTalonKnown(view) && !hasPlayableTalonCard(view);
         stuck = stuck || talonUseless;
 
-        Best best = new Best();
+        BestMove best = new BestMove();
         // a King is "ready" only if there are more Kings available than columns already empty
         boolean kingReady = countReadyKings(view) > countEmptyPiles(view);
         int emptyPile = firstEmptyPile(view);
@@ -96,7 +96,7 @@ public class RuleBasedPlayer {
 
     // ------------------------------------------------------------ foundation
 
-    private void offerFoundationMoves(PlayerView view, boolean stuck, Best best) {
+    private void offerFoundationMoves(PlayerView view, boolean stuck, BestMove best) {
         List<Card> waste = view.waste();
         if (!waste.isEmpty()) {
             Card card = waste.getLast();
@@ -143,7 +143,7 @@ public class RuleBasedPlayer {
     // ------------------------------------------------------------- tableau runs
 
     private void offerRunMoves(PlayerView view, int from, int emptyPile, boolean kingReady,
-                               boolean stuck, Best best) {
+                               boolean stuck, BestMove bestmove) {
         List<Card> run = view.faceUpCards(from);
         if (run.isEmpty()) {
             return;
@@ -163,10 +163,10 @@ public class RuleBasedPlayer {
             boolean toEmpty = target == null;
             if (hidden > 0) {
                 int score = toEmpty ? KING_STACK_TO_EMPTY + run.size() : FLIP + from * 100 - view.faceDownCount(to) * 5;
-                best.offer(BoardMove.tableauToTableau(from, to, run.size()), score);
+                bestmove.offer(BoardMove.tableauToTableau(from, to, run.size()), score);
             } else if (!toEmpty) {
                 int score = kingReady ? EMPTY_A_COLUMN + from : stuck ? STUCK_EMPTY_A_COLUMN + from : 0;
-                best.offer(BoardMove.tableauToTableau(from, to, run.size()), score);
+                bestmove.offer(BoardMove.tableauToTableau(from, to, run.size()), score);
             }
         }
 
@@ -180,7 +180,7 @@ public class RuleBasedPlayer {
                 Card moving = run.get(run.size() - count);
                 for (int to = 0; to < PILES; to++) {
                     if (to != from && top(view, to) != null && rules.canPlaceOnTableau(moving, top(view, to))) {
-                        best.offer(BoardMove.tableauToTableau(from, to, count), STUCK_UNCOVER + from);
+                        bestmove.offer(BoardMove.tableauToTableau(from, to, count), STUCK_UNCOVER + from);
                     }
                 }
             }
@@ -189,7 +189,7 @@ public class RuleBasedPlayer {
 
     // ------------------------------------------------------------------ waste
 
-    private void offerWasteToTableau(PlayerView view, int emptyPile, Best best) {
+    private void offerWasteToTableau(PlayerView view, int emptyPile, BestMove bestmove) {
         List<Card> waste = view.waste();
         if (waste.isEmpty()) {
             return;
@@ -205,18 +205,18 @@ public class RuleBasedPlayer {
                 continue;
             }
             int score = toEmpty ? WASTE_KING_TO_EMPTY : WASTE_TO_TABLEAU - view.faceDownCount(to);
-            best.offer(BoardMove.wasteToTableau(to), score);
+            bestmove.offer(BoardMove.wasteToTableau(to), score);
         }
     }
 
     // ------------------------------------------------------------------ stock
 
     /** The stock is the last resort. */
-    private void offerStockMove(PlayerView view, Best best) {
+    private void offerStockMove(PlayerView view, BestMove bestmove) {
         if (view.stockSize() > 0) {
-            best.offer(BoardMove.draw(), DRAW);
+            bestmove.offer(BoardMove.draw(), DRAW);
         } else if (!view.waste().isEmpty()) {
-            best.offer(BoardMove.recycle(), RECYCLE);
+            bestmove.offer(BoardMove.recycle(), RECYCLE);
         }
     }
 
@@ -308,7 +308,7 @@ public class RuleBasedPlayer {
     }
 
     /** Keeps the highest-scoring legal move; a score of 0 or fewer means "not wanted". */
-    private static final class Best {
+    private static final class BestMove {
         private BoardMove move;
         private int score;
 
