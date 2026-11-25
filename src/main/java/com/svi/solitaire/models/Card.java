@@ -4,17 +4,27 @@ import com.svi.solitaire.constants.GameConstants;
 import com.svi.solitaire.enums.Rank;
 import com.svi.solitaire.enums.Suit;
 
+import java.util.Objects;
+
 /**
  * An immutable playing card: a rank and a suit. Use {@code CardFactory} to get the shared instances.
  */
-public record Card(Rank rank, Suit suit) {
+public final class Card {
+
+    /** The rank of the card. */
+    private final Rank rank;
+    /** The suit of the card. */
+    private final Suit suit;
+
     /**
      * Creates a card.
      *
      * @param rank the rank of the card
      * @param suit the suit of the card
      */
-    public Card {
+    public Card(Rank rank, Suit suit) {
+        this.rank = rank;
+        this.suit = suit;
     }
 
     /**
@@ -22,7 +32,6 @@ public record Card(Rank rank, Suit suit) {
      *
      * @return the rank of the card
      */
-    @Override
     public Rank rank() {
         return rank;
     }
@@ -32,7 +41,6 @@ public record Card(Rank rank, Suit suit) {
      *
      * @return the suit of the card
      */
-    @Override
     public Suit suit() {
         return suit;
     }
@@ -60,14 +68,17 @@ public record Card(Rank rank, Suit suit) {
      */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Card(Rank rank1, Suit suit1))) return false;
-        return rank == rank1 && suit == suit1;
+        return o instanceof Card other && rank == other.rank && suit == other.suit;
     }
 
+    /**
+     * Returns a hash code based on rank and suit, consistent with {@link #equals(Object)}.
+     *
+     * @return a hash code based on rank and suit
+     */
     @Override
     public int hashCode() {
-        return id();
+        return Objects.hash(rank, suit);
     }
 
     /**
@@ -77,6 +88,6 @@ public record Card(Rank rank, Suit suit) {
      */
     @Override
     public String toString() {
-        return this.suit.getSymbol() + "-" + this.rank.getSymbol();
+        return suit.getSymbol() + "-" + rank.getSymbol();
     }
 }
